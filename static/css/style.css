@@ -1,0 +1,379 @@
+/* ==========================================================================
+   Base & Utilities
+   ========================================================================== */
+
+.invisible {
+    visibility: hidden !important;
+}
+
+/* Hide scrollbar for cleaner UI */
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ==========================================================================
+   Fonts
+   ========================================================================== */
+.font-newsreader {
+    font-family: 'Newsreader', serif !important;
+}
+
+.font-oswald {
+    font-family: 'Oswald', sans-serif !important;
+}
+
+/* ==========================================================================
+   Scroll Animations
+   ========================================================================== */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blurIn {
+    0% {
+        opacity: 0;
+        filter: blur(15px);
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
+.scroll-item {
+    animation-duration: 0.8s;
+    animation-fill-mode: both;
+    animation-play-state: paused;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scroll-fade-up {
+    animation-name: fadeInUp;
+}
+
+.scroll-blur-in {
+    animation-name: blurIn;
+}
+
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
+/* ==========================================================================
+   CTA Button Effects
+   ========================================================================== */
+@keyframes beam-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes lines-slide {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 24px 0;
+    }
+}
+
+/* Border Gradient Pseudo-Element */
+[style*='--border-gradient']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: var(--border-radius-before, inherit);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    background: var(--border-gradient);
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   Phone Mockup - Chart Card
+   ========================================================================== */
+@keyframes bar-grow {
+    0% {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes tooltip-fade {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Phone Mockup - Top Content Card (Progress Loop)
+   ========================================================================== */
+@keyframes progress-loop {
+    0% {
+        width: 0;
+        opacity: 0.5;
+    }
+
+    40% {
+        width: var(--target-width);
+        opacity: 1;
+    }
+
+    80% {
+        width: var(--target-width);
+        opacity: 1;
+    }
+
+    100% {
+        width: var(--target-width);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   Dashboard Grid - Looping Animations
+   ========================================================================== */
+@keyframes draw-path-loop {
+    0% {
+        stroke-dashoffset: 1000;
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    40% {
+        stroke-dashoffset: 0;
+    }
+
+    90% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes width-grow-loop {
+    0% {
+        width: 0;
+        opacity: 1;
+    }
+
+    40% {
+        width: var(--target-width);
+    }
+
+    90% {
+        width: var(--target-width);
+        opacity: 1;
+    }
+
+    100% {
+        width: var(--target-width);
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in-up-loop {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scale-in-loop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    20% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    90% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spin-slow-reverse {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+/* Animation Classes for Dashboard Grid */
+.animate-draw {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-path-loop 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation-play-state: paused;
+}
+
+.animate-width {
+    width: 0;
+    animation: width-grow-loop 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation-play-state: paused;
+}
+
+.animate-fade-up {
+    opacity: 0;
+    animation: fade-in-up-loop 6s ease-out infinite;
+    animation-play-state: paused;
+}
+
+.animate-scale {
+    opacity: 0;
+    animation: scale-in-loop 6s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+    animation-play-state: paused;
+}
+
+/* Utility to start animations when in-view */
+.in-view .animate-draw,
+.in-view .animate-width,
+.in-view .animate-fade-up,
+.in-view .animate-scale {
+    animation-play-state: running;
+}
+
+/* ==========================================================================
+   Upload Modal Styles
+   ========================================================================== */
+
+/* Custom select arrow */
+#language-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+/* Drop zone drag over effect */
+#drop-zone.drag-over {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Hide scrollbar in modals */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Result animation */
+@keyframes result-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#results-section:not(.hidden) {
+    animation: result-slide-in 0.3s ease-out;
+}
+
+/* Loading spinner */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

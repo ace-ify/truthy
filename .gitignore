@@ -1,0 +1,51 @@
+# Virtual Environments
+venv/
+env/
+.venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Temporary files
+uploads/
+temp/
+tmp/
+*.log
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Models
+models/
+silero_vad.jit

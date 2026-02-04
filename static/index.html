@@ -1,0 +1,2214 @@
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truthy - AI Voice Detection</title>
+
+  <!-- External Scripts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <meta name="disabled-font-classes"
+    content="font-roboto,font-montserrat,font-poppins,font-playfair,font-instrument-serif,font-merriweather,font-bricolage,font-jakarta,font-manrope,font-space-grotesk,font-work-sans,font-pt-serif,font-geist-mono,font-space-mono,font-nunito,font-geist,font-quicksand,font-dm-sans,font-google-sans-flex">
+</head>
+
+<body class="antialiased overflow-x-hidden selection:bg-primary selection:text-black text-white bg-[#000000]">
+
+
+
+  <!-- Background (component) added by Aura -->
+  <div class="aura-background-component fixed top-0 w-full h-screen -z-10" data-alpha-mask="80"
+    style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+    <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+      <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+      <script type="text/javascript">
+        !function () { if (!window.UnicornStudio) { window.UnicornStudio = { isInitialized: !1 }; var i = document.createElement("script"); i.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js", i.onload = function () { window.UnicornStudio.isInitialized || (UnicornStudio.init(), window.UnicornStudio.isInitialized = !0) }, (document.head || document.body).appendChild(i) } }();
+      </script>
+    </div>
+  </div>
+
+  <!-- Background Effects -->
+  <div class="fixed inset-0 z-0 pointer-events-none" style="visibility: hidden;">
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[600px] bg-primary/5 rounded-full blur-[120px] opacity-40">
+    </div>
+    <!-- Subtle Grid Pattern -->
+    <div
+      class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-soft-light">
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex z-50 w-full pt-6 pr-4 pl-4 fixed top-0 left-0 right-0 items-center justify-center">
+    <div
+      class="flex bg-black/90 backdrop-blur-md w-full max-w-5xl border-white/10 border rounded-full pt-4 pr-4 pb-4 pl-14 relative shadow-2xl items-center justify-between scroll-item scroll-fade-up"
+      style="animation-play-state: running;">
+      <!-- Logo -->
+      <a href="#" class="inline-flex items-center justify-center"><img
+          src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65"
+          alt="Truthy" class="h-[21px]"></a>
+
+      <!-- Centered Links -->
+      <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+        <a href="#api"
+          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          API
+        </a>
+        <a href="#features"
+          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          Features
+        </a>
+        <a href="#features"
+          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          Languages
+        </a>
+        <a href="#api"
+          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          Docs
+        </a>
+        <a href="#testimonials"
+          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          About
+        </a>
+      </div>
+
+      <!-- Right Action -->
+      <div class="flex items-center gap-4">
+        <!-- Mobile Menu Trigger -->
+        <button class="md:hidden p-2 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-menu">
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Button -->
+        <a href="#pricing"
+          class="hidden md:block bg-white text-black hover:bg-gray-200 transition-colors px-6 py-2.5 rounded-full text-sm font-semibold tracking-tight font-sans">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Content -->
+  <main class="flex flex-col z-10 pt-40 pr-6 pl-6 relative gap-x-3 gap-y-x-3 items-center justify-center">
+    <!-- Version Badge -->
+    <div
+      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm mb-8 hover:bg-white/10 transition-colors cursor-pointer group scroll-item scroll-fade-up"
+      style="animation-play-state: running;">
+      <span class="bg-blue-500/20 text-blue-400 rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide font-sans">
+        NEW
+      </span>
+      <span
+        class="text-xs text-gray-300 padding-top-40 font-medium group-hover:text-white transition-colors pr-1 font-sans">
+        Multilingual Support
+      </span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"
+        class="lucide lucide-arrow-right w-3 h-3 text-gray-500 group-hover:text-white transition-colors">
+        <path d="M5 12h14"></path>
+        <path d="m12 5 7 7-7 7"></path>
+      </svg>
+    </div>
+
+    <!-- Headline -->
+    <h1
+      class="text-center text-5xl md:text-7xl leading-[1.1] max-w-4xl mx-auto font-oswald font-light tracking-tight scroll-item scroll-blur-in delay-100"
+      style="animation-play-state: running;">
+      Detect Deepfakes.
+      <span class="text-blue-500 font-oswald font-light tracking-tight">
+        Instantly.
+      </span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="text-center text-xl text-gray-400 mt-8 max-w-2xl mx-auto leading-relaxed font-light font-sans scroll-item scroll-fade-up delay-200"
+      style="animation-play-state: running;">
+      Your all-in-one solution for detecting AI voices, verifying authenticity, and protecting against audio deepfakes
+      effortlessly.
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="flex flex-col sm:flex-row items-center gap-4 mt-10 scroll-item scroll-fade-up delay-300"
+      style="animation-play-state: running;">
+      <button data-open-modal
+        class="group inline-flex overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] focus:outline-none sm:w-auto text-sm font-medium text-white w-full h-[54px] rounded-full pt-4 pr-8 pb-4 pl-8 relative items-center justify-center"
+        style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2)); --border-radius-before: 9999px">
+
+        <!-- CTA Button animations are in /static/css/style.css -->
+
+        <!-- Full Border Beam (Clean Blue Line) -->
+        <div class="absolute inset-0 -z-20 rounded-full overflow-hidden p-[1px]">
+          <div class="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,#3b82f6_360deg)]"
+            style="animation: beam-spin 3s linear infinite;"></div>
+          <div class="absolute inset-[1px] rounded-full bg-[#050505]"></div>
+        </div>
+
+        <!-- Inner Background & Effects -->
+        <div class="overflow-hidden bg-[#0A0A0A] rounded-full absolute top-[2px] right-[2px] bottom-[2px] left-[2px]">
+          <!-- Gradient Background -->
+          <div class="bg-gradient-to-b from-blue-900/20 to-transparent absolute top-0 right-0 bottom-0 left-0"></div>
+
+          <!-- Vertical Lines Animation (Smaller & Monotone) -->
+          <div class="opacity-[0.07] mix-blend-plus-lighter absolute top-0 right-0 bottom-0 left-0"
+            style="background-image: repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 1px, transparent 8px);  background-size: 24px 100%;  animation: lines-slide 1.5s linear infinite; position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0))">
+          </div>
+
+          <!-- Blue Glow on Hover -->
+          <div
+            class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-1/2 bg-blue-500/20 blur-2xl rounded-full pointer-events-none transition-colors duration-500 group-hover:bg-blue-500/40">
+          </div>
+        </div>
+
+        <!-- Content -->
+        <span
+          class="transition-colors group-hover:text-white uppercase font-semibold text-white/90 tracking-tight z-10 relative font-sans">
+          Analyze Voice
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-arrow-right relative z-10 ml-2 transition-transform duration-300 group-hover:translate-x-1">
+          <path d="M5 12h14" class=""></path>
+          <path d="m12 5 7 7-7 7" class=""></path>
+        </svg>
+        <style id="border-gradient-shared-style">
+          [style*="--border-gradient"]::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: var(--border-radius-before, inherit);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box,
+              linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box,
+              linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            background: var(--border-gradient);
+            pointer-events: none;
+          }
+        </style>
+      </button>
+      <button
+        class="sm:w-auto hover:bg-blue-500/10 hover:border-blue-400 hover:shadow-[0_0_35px_rgba(59,130,246,0.6),inset_0_0_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white bg-black/60 w-full border-blue-500 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 shadow-[0_0_20px_rgba(59,130,246,0.5),inset_0_0_10px_rgba(59,130,246,0.2)] gap-x-2 gap-y-2 items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          data-lucide="play-circle"
+          class="lucide lucide-play-circle w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors">
+          <path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"></path>
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        How It Works
+      </button>
+    </div>
+
+    <!-- Visual / Phone Mockup Section -->
+    <div
+      class="flex w-full h-[750px] max-w-5xl mt-32 mr-auto ml-auto relative items-center justify-center scroll-item scroll-blur-in delay-500"
+      style="animation-play-state: running;">
+      <!-- Floating Element: Salary (Top Left) -->
+      <div
+        class="absolute left-0 lg:left-12 top-20 z-20 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[bounce_6s_infinite]">
+        <div class="w-8 h-8 rounded bg-green-900/30 flex items-center justify-center border border-green-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-briefcase w-4 h-4 text-green-400">
+            <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            <rect width="20" height="14" x="2" y="6" rx="2"></rect>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          ✓ Classification layers
+        </span>
+      </div>
+
+      <!-- Floating Element: Holidays (Left Middle) -->
+      <div
+        class="absolute left-4 lg:-left-4 top-64 z-10 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[pulse_5s_infinite]">
+        <div class="w-8 h-8 rounded bg-red-900/30 flex items-center justify-center border border-red-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-plane w-4 h-4 text-red-400">
+            <path d="M2 12h20"></path>
+            <path d="M13 2v20"></path>
+            <path d="m9 2 9.5 9.5-2 2.5-9-9.5V2Z"></path>
+            <path d="M13 22 3.5 12.5l2-2.5 9 9.5v2.5Z"></path>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          ⚠ AI Voice Warning
+        </span>
+      </div>
+
+      <!-- Floating Element: Subscription (Left Bottom - NEW) -->
+      <div
+        class="absolute left-8 lg:left-0 bottom-48 z-20 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[bounce_8s_infinite]">
+        <div class="w-8 h-8 rounded bg-purple-900/30 flex items-center justify-center border border-purple-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-tv w-4 h-4 text-purple-400">
+            <rect width="20" height="15" x="2" y="7" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          ✓ 5+ Languages Supported
+        </span>
+      </div>
+
+      <!-- Floating Element: Coffee (Top Right) -->
+      <div
+        class="absolute right-0 lg:right-24 top-10 z-20 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[bounce_7s_infinite]">
+        <div class="w-8 h-8 rounded bg-teal-900/30 flex items-center justify-center border border-teal-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-coffee w-4 h-4 text-teal-400">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" class=""></path>
+            <line x1="6" x2="6" y1="2" y2="4"></line>
+            <line x1="10" x2="10" y1="2" y2="4"></line>
+            <line x1="14" x2="14" y1="2" y2="4"></line>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          ✓ API-based
+        </span>
+      </div>
+
+      <!-- Floating Element: Dividend (Right Middle) -->
+      <div
+        class="absolute right-4 lg:right-0 top-48 z-10 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[pulse_4s_infinite]">
+        <div class="w-8 h-8 rounded bg-pink-900/30 flex items-center justify-center border border-pink-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-trending-up w-4 h-4 text-pink-400">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          98.5% Confidence
+        </span>
+      </div>
+
+      <!-- Floating Element: Portfolio (Right Bottom - NEW) -->
+      <div
+        class="absolute right-8 lg:-right-4 bottom-32 z-10 hidden md:flex items-center gap-3 p-2.5 pr-4 bg-[#111] border border-white/10 rounded-lg shadow-2xl animate-[pulse_6s_infinite]">
+        <div class="w-8 h-8 rounded bg-blue-900/30 flex items-center justify-center border border-blue-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-pie-chart w-4 h-4 text-blue-400">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+          </svg>
+        </div>
+        <span class="text-xs font-medium text-gray-400 font-sans">
+          ✓ Crisp Explanation
+        </span>
+      </div>
+
+      <!-- Phone Frame -->
+      <div
+        class="border-[8px] border-[#222] overflow-hidden flex flex-col min-h-[820px] bg-[#050505] w-full max-w-[380px] max-h-[720px] ring-white/10 ring-1 rounded-[3rem] mr-auto ml-auto relative shadow-2xl">
+        <!-- Status Bar -->
+        <div class="h-12 w-full flex justify-between items-end px-8 pb-2 z-20 bg-[#050505]">
+          <span class="text-[13px] font-semibold text-white tracking-widest font-sans">
+            9:41
+          </span>
+          <div class="flex gap-1.5 items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="currentColor"
+              class="text-white">
+              <path
+                d="M14.6 2.4C14.2 2 13.5 2 13.1 2.4L8 7.5 2.9 2.4C2.5 2 1.8 2 1.4 2.4C1 2.8 1 3.5 1.4 3.9L7.3 9.8C7.7 10.2 8.3 10.2 8.7 9.8L14.6 3.9C15 3.5 15 2.8 14.6 2.4Z">
+              </path>
+              <path
+                d="M12.4 0.2C12 0.6 12 1.3 12.4 1.7L8 6.1 3.6 1.7C4 1.3 4 0.6 3.6 0.2C3.2 -0.2 2.5 -0.2 2.1 0.2L7.3 5.4C7.7 5.8 8.3 5.8 8.7 5.4L13.9 0.2C13.5 -0.2 12.8 -0.2 12.4 0.2Z">
+              </path>
+              <path
+                d="M8 8.2C8.4 8.2 8.7 8.5 8.7 8.9C8.7 9.3 8.4 9.6 8 9.6C7.6 9.6 7.3 9.3 7.3 8.9C7.3 8.5 7.6 8.2 8 8.2Z">
+              </path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 18 12" fill="currentColor"
+              class="text-white">
+              <path
+                d="M15 2H3C1.3 2 0 3.3 0 5V7C0 8.7 1.3 10 3 10H15C16.7 10 18 8.7 18 7V5C18 3.3 16.7 2 15 2ZM3 3H15C16.1 3 17 3.9 17 5V7C17 8.1 16.1 9 15 9H3C1.9 9 1 8.1 1 7V5C1 3.9 1.9 3 3 3Z">
+              </path>
+              <path
+                d="M11.5 4H6.5C5.7 4 5 4.7 5 5.5V6.5C5 7.3 5.7 8 6.5 8H11.5C12.3 8 13 7.3 13 6.5V5.5C13 4.7 12.3 4 11.5 4Z">
+              </path>
+            </svg>
+            <div class="w-6 h-3 rounded-[4px] border border-white/30 relative ml-0.5 p-0.5">
+              <div class="h-full bg-white rounded-[2px] w-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header -->
+        <div class="px-6 pt-2 pb-4 flex items-center justify-between z-10 bg-[#050505]">
+          <h1 class="text-2xl text-white font-oswald font-light tracking-tight">
+            Analysis
+          </h1>
+          <div class="flex items-center gap-4">
+            <button class="text-white hover:text-gray-300 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-bell">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+              </svg>
+            </button>
+
+            <button
+              class="w-9 h-9 rounded-full bg-[#27272A] flex items-center justify-center text-white hover:bg-[#3F3F46] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-plus">
+                <path d="M5 12h14"></path>
+                <path d="M12 5v14"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+
+        <!-- Scrollable Content -->
+        <!-- Key change: less wasted padding + safe area so bottom nav doesn't cover content -->
+        <div class="flex-1 overflow-y-auto no-scrollbar px-5 pb-[120px]">
+          <!-- Chart Card -->
+          <div
+            class="overflow-visible border-white/[0.08] bg-[#101018] border rounded-[2rem] mb-6 pt-5 pr-5 pb-5 pl-5 relative shadow-2xl">
+            <!-- Chart animations are in /static/css/style.css -->
+            <div
+              class="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-500/5 via-transparent to-blue-500/5 rounded-[2rem] pointer-events-none">
+            </div>
+
+            <div class="flex justify-between items-start mb-8 relative z-10">
+              <div>
+                <h2 class="text-xl font-semibold text-white tracking-tight font-sans">
+                  Detection Stats
+                </h2>
+                <p class="text-[13px] text-gray-400 mt-1 font-medium font-sans">
+                  Last 7 days
+                </p>
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse">
+                </div>
+                <span class="text-[11px] font-medium text-gray-400 font-sans">
+                  AI Gen - 80%
+                </span>
+              </div>
+            </div>
+
+            <div class="relative h-64 w-full pl-6">
+              <div
+                class="absolute left-0 top-0 h-full flex flex-col justify-between text-[11px] text-gray-500 font-medium pb-8 pt-2">
+                <span class="font-sans">100</span>
+                <span class="font-sans">75</span>
+                <span class="font-sans">50</span>
+                <span class="font-sans">25</span>
+                <span class="font-sans">0</span>
+              </div>
+
+              <div
+                class="absolute left-8 right-0 top-0 h-full flex flex-col justify-between pb-8 pt-2 pointer-events-none">
+                <div class="w-full h-px border-t border-dashed border-white/10"></div>
+                <div class="w-full h-px border-t border-dashed border-white/10"></div>
+                <div class="w-full h-px border-t border-dashed border-white/10"></div>
+                <div class="w-full h-px border-t border-dashed border-white/10"></div>
+                <div class="w-full h-px border-t border-dashed border-white/10"></div>
+              </div>
+
+              <div class="flex justify-between items-end h-full pl-3 pb-8 relative z-10">
+                <!-- Bar 1 -->
+                <div class="flex flex-col items-center gap-3 w-1/4 group cursor-pointer relative h-full justify-end">
+                  <div
+                    class="bg-[#1A1A24] border border-white/10 rounded-lg py-1.5 px-2.5 mb-1 absolute -top-4 shadow-xl z-20 opacity-0"
+                    style="animation: tooltip-fade 0.5s ease-out forwards 0.8s;">
+                    <div class="text-[11px] font-semibold text-white text-center leading-tight font-sans">
+                      80%
+                      <span class="text-gray-400 font-medium font-sans">
+                        46K
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="w-12 h-[75%] bg-gradient-to-b from-[#4F46E5] to-[#4F46E5]/10 rounded-t-lg relative overflow-hidden group-hover:brightness-110 transition-all origin-bottom opacity-0"
+                    style="animation: bar-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.1s;">
+                    <div class="absolute top-0 left-0 w-full h-[40%] bg-gradient-to-b from-white/10 to-transparent">
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap absolute -bottom-6 font-sans">
+                    English
+                  </span>
+                </div>
+
+                <!-- Bar 2 -->
+                <div class="flex flex-col items-center gap-3 w-1/4 group cursor-pointer relative h-full justify-end">
+                  <div
+                    class="bg-[#1A1A24] border border-white/10 rounded-lg py-1.5 px-2.5 mb-1 absolute top-[15%] shadow-xl z-20 opacity-0"
+                    style="animation: tooltip-fade 0.5s ease-out forwards 0.9s;">
+                    <div class="text-[11px] font-semibold text-white text-center leading-tight font-sans">
+                      70%
+                      <span class="text-gray-400 font-medium font-sans">
+                        41K
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="w-12 h-[60%] bg-gradient-to-b from-[#6366F1] to-[#6366F1]/10 rounded-t-lg relative overflow-hidden group-hover:brightness-110 transition-all origin-bottom opacity-0"
+                    style="animation: bar-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.2s;">
+                    <div class="absolute top-0 left-0 w-full h-[40%] bg-gradient-to-b from-white/10 to-transparent">
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap absolute -bottom-6 font-sans">
+                    Tamil
+                  </span>
+                </div>
+
+                <!-- Bar 3 -->
+                <div class="flex flex-col items-center gap-3 w-1/4 group cursor-pointer relative h-full justify-end">
+                  <div
+                    class="bg-[#1A1A24] border border-white/10 rounded-lg py-1.5 px-2.5 mb-1 absolute top-[15%] shadow-xl z-20 opacity-0"
+                    style="animation: tooltip-fade 0.5s ease-out forwards 1.0s;">
+                    <div class="text-[11px] font-semibold text-white text-center leading-tight font-sans">
+                      70%
+                      <span class="text-gray-400 font-medium font-sans">
+                        41K
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="w-12 h-[60%] bg-gradient-to-b from-[#8B5CF6] to-[#8B5CF6]/10 rounded-t-lg relative overflow-hidden group-hover:brightness-110 transition-all origin-bottom opacity-0"
+                    style="animation: bar-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.3s;">
+                    <div class="absolute top-0 left-0 w-full h-[40%] bg-gradient-to-b from-white/10 to-transparent">
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap absolute -bottom-6 font-sans">
+                    Telugu
+                  </span>
+                </div>
+
+                <!-- Bar 4 -->
+                <div class="flex flex-col items-center gap-3 w-1/4 group cursor-pointer relative h-full justify-end">
+                  <div
+                    class="bg-[#1A1A24] border border-white/10 rounded-lg py-1.5 px-2.5 mb-1 absolute top-[5%] shadow-xl z-20 opacity-0"
+                    style="animation: tooltip-fade 0.5s ease-out forwards 1.1s;">
+                    <div class="text-[11px] font-semibold text-white text-center leading-tight font-sans">
+                      78%
+                      <span class="text-gray-400 font-medium font-sans">
+                        30K
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="w-12 h-[70%] bg-gradient-to-b from-[#8B5CF6] to-[#8B5CF6]/10 rounded-t-lg relative overflow-hidden group-hover:brightness-110 transition-all origin-bottom opacity-0"
+                    style="animation: bar-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.4s;">
+                    <div class="absolute top-0 left-0 w-full h-[40%] bg-gradient-to-b from-white/10 to-transparent">
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap absolute -bottom-6 font-sans">
+                    Hindi
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-8 bg-blue-500/10 blur-xl rounded-full pointer-events-none">
+            </div>
+          </div>
+
+          <!-- Top Content Card -->
+          <div class="border-white/[0.08] bg-[#101018] border rounded-[2rem] pt-5 pr-5 pb-5 pl-5 relative">
+            <!-- Progress loop animation is in /static/css/style.css -->
+            <div class="flex justify-between items-start mb-6">
+              <div class="">
+                <h2 class="text-lg font-semibold text-white tracking-tight font-sans">
+                  Recent Scans
+                </h2>
+                <p class="text-[13px] text-gray-400 mt-1 font-medium font-sans">
+                  Last 24 hours
+                </p>
+              </div>
+              <button
+                class="px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-[11px] font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-colors font-sans">
+                More
+              </button>
+            </div>
+
+            <div class="flex items-baseline gap-3 mb-8">
+              <span class="text-xl font-light text-white tracking-tight font-oswald">
+                95.6%
+              </span>
+              <span class="text-xs text-gray-500 font-medium font-sans">
+                Accuracy
+              </span>
+            </div>
+
+            <div class="space-y-6">
+              <div class="flex gap-4 items-start group cursor-pointer">
+                <div
+                  class="w-12 h-12 rounded-[10px] overflow-hidden bg-gray-800 shrink-0 shadow-lg ring-1 ring-white/5">
+                  <div
+                    class="w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-400 via-red-500 to-purple-600 scale-125 group-hover:scale-110 transition-transform duration-500">
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0 pt-0.5">
+                  <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-medium text-white truncate pr-2 font-sans">
+                      Celebrity_Clone.wav
+                    </h3>
+                    <span class="text-xs font-semibold text-red-400 font-sans">
+                      AI Generated
+                    </span>
+                  </div>
+                  <div class="w-full h-1.5 bg-[#2A2A35] rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full"
+                      style="--target-width: 70%; width: 80%; animation: progress-loop 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+                <div
+                  class="w-12 h-12 rounded-[10px] overflow-hidden bg-gray-800 shrink-0 shadow-lg ring-1 ring-white/5">
+                  <div
+                    class="w-full h-full bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-400 via-indigo-500 to-purple-600 scale-125">
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0 pt-0.5">
+                  <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-medium text-white truncate pr-2 font-sans">
+                      Audio_Sample_209.mp3
+                    </h3>
+                    <span class="text-xs font-semibold text-green-400 font-sans">
+                      Human
+                    </span>
+                  </div>
+                  <div class="w-full h-1.5 bg-[#2A2A35] rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+                      style="--target-width: 40%; width: 40%; animation: progress-loop 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.2s;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="absolute bottom-0 w-full h-[90px] z-30 px-4">
+          <div
+            class="absolute inset-x-0 bottom-0 h-[80px] bg-[#12121A]/95 backdrop-blur-2xl border-t border-white/[0.08] rounded-t-[2.5rem]">
+          </div>
+
+          <div class="relative h-full flex items-end justify-between px-2 pb-5">
+            <button
+              class="flex flex-col items-center gap-1.5 text-gray-500 hover:text-white transition-colors w-16 group mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-layout-grid group-hover:scale-110 transition-transform">
+                <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+                <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+                <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+                <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+              </svg>
+              <span class="text-[10px] font-medium font-sans">Home</span>
+            </button>
+
+            <button
+              class="flex flex-col items-center gap-1.5 text-gray-500 hover:text-white transition-colors w-16 group mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-play-circle group-hover:scale-110 transition-transform">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+              </svg>
+              <span class="text-[10px] font-medium font-sans">Upload</span>
+            </button>
+
+            <div class="relative -top-5 flex flex-col items-center justify-center w-16 group cursor-pointer z-50">
+              <div
+                class="w-[3.5rem] h-[3.5rem] rounded-full bg-gradient-to-tr from-[#6366F1] to-[#A855F7] flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.5)] border-[5px] border-[#050505] group-hover:scale-105 transition-transform duration-300 ring-1 ring-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-line-chart">
+                  <path d="M3 3v18h18"></path>
+                  <path d="m19 9-5 5-4-4-3 3"></path>
+                </svg>
+              </div>
+              <span class="text-[10px] font-semibold text-white mt-2 drop-shadow-md font-sans">
+                Analyze
+              </span>
+            </div>
+
+            <button
+              class="flex flex-col items-center gap-1.5 text-gray-500 hover:text-white transition-colors w-16 group mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-dollar-sign group-hover:scale-110 transition-transform">
+                <line x1="12" x2="12" y1="2" y2="22"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <span class="text-[10px] font-medium font-sans">History</span>
+            </button>
+
+            <button
+              class="flex flex-col items-center gap-1.5 text-gray-500 hover:text-white transition-colors w-16 group mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-users group-hover:scale-110 transition-transform">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span class="text-[10px] font-medium font-sans">Settings</span>
+            </button>
+          </div>
+
+          <div
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full z-40 hover:bg-white/40 transition-colors">
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Fade -->
+      <div
+        class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none">
+      </div>
+    </div>
+
+    <!-- INTELLIGENCE SECTION -->
+    <section id="features" class="z-10 w-full max-w-7xl mt-32 mr-auto mb-24 ml-auto pr-0 pl-0 relative space-y-20">
+      <!-- Grid -->
+      <div
+        class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-24 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 w-full">
+          <div class="flex flex-col gap-6 max-w-3xl">
+            <div class="flex gap-3 gap-x-3 gap-y-3 items-center scroll-item scroll-fade-up"
+              style="animation-play-state: running;">
+              <span
+                class="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-500/10 text-[11px] font-mono font-medium text-blue-400 border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.2)] font-sans">
+                01
+              </span>
+              <span class="text-sm font-medium tracking-widest uppercase text-gray-500 font-sans">
+                Intelligence
+              </span>
+            </div>
+            <h2
+              class="text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] font-oswald font-light tracking-tight scroll-item scroll-fade-up delay-100"
+              style="animation-play-state: running;">
+              Deep Learning
+              <span class="text-gray-600 font-oswald font-light tracking-tight">
+                Audio Forensics
+              </span>
+            </h2>
+            <p class="leading-relaxed text-lg font-light text-gray-400 max-w-xl scroll-item scroll-fade-up delay-200"
+              style="animation-play-state: running;">
+              Analyze spectral artifacts and prosody to identify synthetic speech patterns
+              with high precision across English, Hindi, Tamil, Malayalam, and Telugu.
+            </p>
+          </div>
+          <button
+            class="group flex items-center gap-2 pl-6 pr-5 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-all duration-200 font-sans whitespace-nowrap scroll-item scroll-fade-up delay-300"
+            style="animation-play-state: running;">
+            <span class="font-sans">Explore Models</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-arrow-right w-4 h-4 transition-transform group-hover:translate-x-1">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[400px] gap-6 gap-x-6 gap-y-6"
+          id="dashboard-grid">
+          <!-- Dashboard grid animations are in /static/css/style.css -->
+
+          <!-- ROI Prediction -->
+          <div
+            class="relative h-[400px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-between group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-100"
+            style="animation-play-state: running;">
+            <!-- Background -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="pointer-events-none absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+            <!-- Header -->
+            <div class="relative z-10">
+              <h3 class="text-4xl font-light text-white tracking-tight font-oswald">
+                Confidence Score
+              </h3>
+              <p class="mt-2 text-lg font-light leading-relaxed text-gray-400">
+                Real-time scoring of audio authenticity probability.
+              </p>
+            </div>
+
+            <!-- Visual -->
+            <div class="relative z-10 h-32 w-full">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
+                <path d="M0 45 L100 45" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 4"></path>
+                <path d="M0 25 L100 25" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 4"></path>
+
+                <defs>
+                  <linearGradient id="gradient-area" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.2"></stop>
+                    <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0"></stop>
+                  </linearGradient>
+                </defs>
+
+                <path d="M0 40 C 20 40, 30 35, 50 20 C 70 5, 80 10, 100 0 V 50 H 0 Z" fill="url(#gradient-area)"
+                  class="animate-fade-up" style="animation-delay: 0.1s"></path>
+                <path d="M0 40 C 20 40, 30 35, 50 20 C 70 5, 80 10, 100 0" fill="none" stroke="#3b82f6" stroke-width="2"
+                  class="animate-draw"></path>
+
+                <foreignObject x="60" y="-10" width="40" height="25" class="animate-scale"
+                  style="animation-delay: 0.8s">
+                  <div xmlns="http://www.w3.org/1999/xhtml"
+                    class="px-2 py-1 rounded bg-blue-500 text-white text-[10px] text-center shadow-[0_0_10px_rgba(59,130,246,0.5)] transform scale-75 origin-center font-sans font-semibold">
+                    <span data-counter-target="99" data-counter-suffix=" %">
+                      0 %
+                    </span>
+                  </div>
+                </foreignObject>
+              </svg>
+            </div>
+          </div>
+
+          <!-- CASHFLOW (MIDDLE) — LONG CARD -->
+          <div
+            class="relative rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col h-[400px] md:h-[400px] lg:h-[824px] lg:row-span-2 group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-200"
+            style="animation-play-state: running;">
+            <!-- Background -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="pointer-events-none absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+
+            <!-- Header -->
+            <div class="relative z-10">
+              <h3 class="text-4xl font-light text-white tracking-tight font-oswald">
+                Language Coverage
+              </h3>
+              <p class="mt-2 text-lg font-light leading-relaxed text-gray-400 max-w-[26rem]">
+                Comprehensive detection capabilities across all supported Indic languages
+                and English variants.
+              </p>
+            </div>
+
+            <!-- Radar (centered, takes the remaining height) -->
+            <div class="relative z-10 flex-1 flex items-center justify-center pt-6">
+              <svg viewBox="0 0 300 300"
+                class="w-[320px] h-[320px] md:w-[360px] md:h-[360px] lg:w-[380px] lg:h-[380px] overflow-visible"
+                preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"></feMergeNode>
+                      <feMergeNode in="SourceGraphic"></feMergeNode>
+                    </feMerge>
+                  </filter>
+
+                  <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"></feGaussianBlur>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"></feMergeNode>
+                      <feMergeNode in="SourceGraphic"></feMergeNode>
+                    </feMerge>
+                  </filter>
+
+                  <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d946ef"></stop>
+                    <stop offset="100%" stop-color="#a855f7"></stop>
+                  </linearGradient>
+
+                  <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#22d3ee"></stop>
+                    <stop offset="100%" stop-color="#06b6d4"></stop>
+                  </linearGradient>
+                </defs>
+
+                <g fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1" stroke-dasharray="3 3">
+                  <circle cx="150" cy="150" r="22" class="animate-scale" style="animation-delay: 0.1s"></circle>
+                  <circle cx="150" cy="150" r="44" class="animate-scale" style="animation-delay: 0.2s"></circle>
+                  <circle cx="150" cy="150" r="66" class="animate-scale" style="animation-delay: 0.3s"></circle>
+                  <circle cx="150" cy="150" r="88" class="animate-scale" style="animation-delay: 0.4s"></circle>
+                  <circle cx="150" cy="150" r="110" class="animate-scale" style="animation-delay: 0.5s"></circle>
+                </g>
+
+                <g stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" class="animate-fade-up"
+                  style="animation-delay: 0.3s">
+                  <line x1="150" y1="150" x2="150" y2="40"></line>
+                  <line x1="150" y1="150" x2="245" y2="95"></line>
+                  <line x1="150" y1="150" x2="245" y2="205"></line>
+                  <line x1="150" y1="150" x2="150" y2="260"></line>
+                  <line x1="150" y1="150" x2="55" y2="205"></line>
+                  <line x1="150" y1="150" x2="55" y2="95"></line>
+                </g>
+
+                <g class="fill-white font-sans text-[11px] font-medium animate-fade-up" text-anchor="middle"
+                  dominant-baseline="middle" style="animation-delay: 0.4s">
+                  <text x="150" y="25">Telugu</text>
+                  <text x="268" y="85">Hindi</text>
+                  <text x="268" y="215">Tamil</text>
+                  <text x="150" y="278">English</text>
+                  <text x="32" y="215">Marathi</text>
+                  <text x="32" y="85">Malayalam</text>
+                </g>
+
+                <path d="M150 62 L197 122 L188 172 L150 249 L102 177 L74 106 Z" fill="none" stroke="url(#grad-purple)"
+                  stroke-width="2" filter="url(#glow-purple)" stroke-linejoin="round" stroke-linecap="round"
+                  class="animate-draw" style="animation-delay: 0.3s"></path>
+
+                <path d="M150 95 L240 102 L230 196 L150 254 L80 190 L107 125 Z" fill="none" stroke="url(#grad-cyan)"
+                  stroke-width="2" filter="url(#glow-cyan)" stroke-linejoin="round" stroke-linecap="round"
+                  class="animate-draw" style="animation-delay: 0.6s"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Engagement Forecasting -->
+          <div
+            class="relative h-[400px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-300"
+            style="animation-play-state: running;">
+            <!-- Background -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="pointer-events-none absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-4xl font-light text-white tracking-tight font-oswald">
+                Latency
+              </h3>
+              <p class="mt-2 text-lg font-light leading-relaxed text-gray-400">
+                Ultra-low latency processing for real-time verification.
+              </p>
+            </div>
+
+            <div class="relative z-10 flex-1 flex items-center justify-center">
+              <!-- Rotating Elements -->
+              <div
+                class="absolute w-32 h-32 rounded-3xl bg-white/[0.03] border border-white/[0.05] animate-[spin-slow_20s_linear_infinite]"
+                style="animation-duration: 25s"></div>
+              <div
+                class="absolute w-24 h-24 rounded-2xl bg-white/[0.05] border border-white/[0.05] animate-[spin-slow-reverse_15s_linear_infinite]"
+                style="animation-duration: 15s"></div>
+
+              <!-- Central Card -->
+              <div
+                class="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-[0_12px_30px_-10px_rgba(59,130,246,0.4)] animate-scale relative z-10">
+                <span class="text-4xl text-white font-oswald font-light tracking-tight flex items-baseline">
+                  <span data-counter-target="45" data-counter-suffix="ms">
+                    0ms
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversion Probability -->
+          <div
+            class="relative h-[400px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-end group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-500"
+            style="animation-play-state: running;">
+            <!-- Background -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="pointer-events-none absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-center -translate-y-10 z-10">
+              <div class="relative animate-fade-up">
+                <span class="text-[8rem] text-white/10 select-none font-oswald font-light tracking-tight flex">
+                  <span data-counter-target="95" data-counter-suffix="%">
+                    0%
+                  </span>
+                </span>
+                <div
+                  class="absolute top-1/2 left-0 h-[4px] bg-gradient-to-r from-blue-600 to-cyan-400 shadow-[0_0_18px_rgba(59,130,246,0.6)] animate-width"
+                  style="--target-width: 100%;"></div>
+              </div>
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-4xl font-light text-white tracking-tight font-oswald">
+                Accuracy
+              </h3>
+              <p class="mt-2 text-lg font-light leading-relaxed text-gray-400">
+                State-of-the-art precision in deepfake identification.
+              </p>
+            </div>
+          </div>
+
+          <!-- Channel Performance -->
+          <div
+            class="relative h-[400px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-end group hover:border-white/[0.15] transition-colors">
+            <!-- Background -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="pointer-events-none absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+
+            <div class="relative z-10 mb-10 flex flex-col gap-6">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xl font-semibold text-white tracking-tight font-sans">
+                  Detected Threats
+                </h4>
+                <button
+                  class="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-4 pr-3 py-1.5 text-xs font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white font-sans">
+                  All Vectors
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="opacity-70">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="flex flex-col gap-5">
+                <div class="flex items-center gap-4">
+                  <span class="w-[110px] shrink-0 text-sm text-gray-300 font-medium truncate font-sans">
+                    ElevenLabs
+                  </span>
+                  <div class="h-3 flex-1 rounded-full bg-white/5 overflow-hidden">
+                    <div class="h-full rounded-full bg-[#d946ef] animate-width"
+                      style="--target-width: 80%; animation-delay: 0.1s"></div>
+                  </div>
+                  <span class="w-12 shrink-0 text-right text-sm text-white font-medium font-sans animate-fade-up"
+                    style="animation-delay: 0.1s">
+                    High
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <span class="w-[110px] shrink-0 text-sm text-gray-300 font-medium truncate font-sans">
+                    PlayHT
+                  </span>
+                  <div class="h-3 flex-1 rounded-full bg-white/5 overflow-hidden">
+                    <div class="h-full rounded-full bg-[#22d3ee] animate-width"
+                      style="--target-width: 90%; animation-delay: 0.2s"></div>
+                  </div>
+                  <span class="w-12 shrink-0 text-right text-sm text-white font-medium font-sans animate-fade-up"
+                    style="animation-delay: 0.2s">
+                    Crit
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <span class="w-[110px] shrink-0 text-sm text-gray-300 font-medium truncate font-sans">
+                    Coqui
+                  </span>
+                  <div class="h-3 flex-1 rounded-full bg-white/5 overflow-hidden">
+                    <div class="h-full rounded-full bg-[#f87171] animate-width"
+                      style="--target-width: 85%; animation-delay: 0.3s"></div>
+                  </div>
+                  <span class="w-12 shrink-0 text-right text-sm text-white font-medium font-sans animate-fade-up"
+                    style="animation-delay: 0.3s">
+                    Med
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <span class="w-[110px] shrink-0 text-sm text-gray-300 font-medium truncate font-sans">
+                    Vall-E
+                  </span>
+                  <div class="h-3 flex-1 rounded-full bg-white/5 overflow-hidden">
+                    <div class="h-full rounded-full bg-[#6366f1] animate-width"
+                      style="--target-width: 60%; animation-delay: 0.4s"></div>
+                  </div>
+                  <span class="w-12 shrink-0 text-right text-sm text-white font-medium font-sans animate-fade-up"
+                    style="animation-delay: 0.4s">
+                    Low
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-4xl font-light text-white tracking-tight font-oswald">
+                Attack Vectors
+              </h3>
+              <p class="mt-2 text-lg font-light leading-relaxed text-gray-400">
+                Analyze and predict emerging synthetic voice models.
+              </p>
+            </div>
+          </div>
+
+          <!-- Counter animation is in /static/js/script.js -->
+        </div>
+      </div>
+      <div id="api"
+        class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-24 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
+        <!-- Hero Section -->
+        <div
+          class="flex flex-col overflow-hidden lg:flex-row lg:gap-24 lg:pt-0 lg:pb-0 mt-12 mb-0 pt-10 pr-10 pb-10 pl-10 relative gap-x-16 gap-y-16 items-center justify-between">
+          <!-- Background Gradient Effect -->
+
+          <!-- Phone Mockup (Left) -->
+          <div class="z-10 shrink-0 lg:mx-0 w-full max-w-[340px] mr-auto ml-auto relative">
+            <!-- Phone Frame -->
+            <div
+              class="border-[8px] overflow-hidden h-[700px] max-w-[400px] border-[#1a1a1a] ring-white/10 ring-1 rounded-[3rem] mr-auto ml-auto relative shadow-2xl bg-[#050505]">
+              <!-- Status Bar -->
+              <div class="absolute top-0 w-full h-12 px-6 flex justify-between items-center z-20 pt-2">
+                <span class="text-[13px] font-semibold text-white tracking-wide font-sans">
+                  9:41
+                </span>
+                <div class="flex gap-1.5 items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="currentColor"
+                    class="text-white">
+                    <path
+                      d="M14.6 2.4C14.2 2 13.5 2 13.1 2.4L8 7.5 2.9 2.4C2.5 2 1.8 2 1.4 2.4C1 2.8 1 3.5 1.4 3.9L7.3 9.8C7.7 10.2 8.3 10.2 8.7 9.8L14.6 3.9C15 3.5 15 2.8 14.6 2.4Z"
+                      class=""></path>
+                    <path
+                      d="M12.4 0.2C12 0.6 12 1.3 12.4 1.7L8 6.1 3.6 1.7C4 1.3 4 0.6 3.6 0.2C3.2 -0.2 2.5 -0.2 2.1 0.2L7.3 5.4C7.7 5.8 8.3 5.8 8.7 5.4L13.9 0.2C13.5 -0.2 12.8 -0.2 12.4 0.2Z">
+                    </path>
+                    <path
+                      d="M8 8.2C8.4 8.2 8.7 8.5 8.7 8.9C8.7 9.3 8.4 9.6 8 9.6C7.6 9.6 7.3 9.3 7.3 8.9C7.3 8.5 7.6 8.2 8 8.2Z">
+                    </path>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 18 12" fill="currentColor"
+                    class="text-white">
+                    <path
+                      d="M15 2H3C1.3 2 0 3.3 0 5V7C0 8.7 1.3 10 3 10H15C16.7 10 18 8.7 18 7V5C18 3.3 16.7 2 15 2ZM3 3H15C16.1 3 17 3.9 17 5V7C17 8.1 16.1 9 15 9H3C1.9 9 1 8.1 1 7V5C1 3.9 1.9 3 3 3Z">
+                    </path>
+                    <path
+                      d="M11.5 4H6.5C5.7 4 5 4.7 5 5.5V6.5C5 7.3 5.7 8 6.5 8H11.5C12.3 8 13 7.3 13 6.5V5.5C13 4.7 12.3 4 11.5 4Z">
+                    </path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Dynamic Notch -->
+              <div
+                class="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-20 pointer-events-none">
+              </div>
+
+              <!-- App Content -->
+              <div class="flex flex-col bg-[#050505] w-full h-full pt-14 relative overflow-hidden font-sans">
+                <!-- Header -->
+                <div class="px-6 pb-4 flex justify-between items-center shrink-0 z-10">
+                  <div class="">
+                    <h1 class="text-2xl font-normal text-white tracking-tight font-oswald">
+                      Verification
+                    </h1>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                      Status: Online
+                    </p>
+                  </div>
+                  <button
+                    class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-white ring-1 ring-white/10 scroll-item scroll-fade-up delay-300"
+                    style="animation-play-state: running;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Main Scroll Area -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 no-scrollbar z-0">
+                  <!-- Balance Card -->
+                  <div class="border-white/[0.08] overflow-hidden bg-[#121215] border rounded-3xl p-6 relative group">
+                    <div
+                      class="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50">
+                    </div>
+
+                    <div class="flex justify-between items-start mb-6 relative z-10">
+                      <div class="">
+                        <p class="text-xs text-gray-400 font-medium mb-1">
+                          Total Credits
+                        </p>
+                        <h2 class="text-3xl font-light text-white tracking-tight font-oswald">
+                          974
+                        </h2>
+                      </div>
+                      <div
+                        class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                          class="text-green-400">
+                          <path d="m18 15-6-6-6 6"></path>
+                        </svg>
+                        <span class="text-[10px] font-semibold text-green-400">
+                          +12.5%
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Chart Visual -->
+                    <div class="flex gap-3 h-32 relative z-10 items-end justify-between px-1">
+                      <!-- Bars -->
+                      <div class="w-1/6 h-[40%] bg-white/5 rounded-t-md hover:bg-indigo-500/50 transition-colors"></div>
+                      <div class="w-1/6 h-[60%] bg-white/5 rounded-t-md hover:bg-indigo-500/50 transition-colors"></div>
+                      <div class="w-1/6 h-[50%] bg-white/5 rounded-t-md hover:bg-indigo-500/50 transition-colors"></div>
+                      <div class="w-1/6 h-[75%] bg-white/5 rounded-t-md hover:bg-indigo-500/50 transition-colors"></div>
+                      <div class="w-1/6 h-[100%] bg-indigo-500 rounded-t-md shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                      </div>
+                      <div class="w-1/6 h-[65%] bg-white/5 rounded-t-md hover:bg-indigo-500/50 transition-colors"></div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Actions -->
+                  <div class="grid grid-cols-4 gap-2">
+                    <button
+                      class="flex flex-col items-center gap-2 p-3 bg-[#121215] rounded-2xl border border-white/5 hover:bg-[#1A1A1E] transition-colors">
+                      <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"></path>
+                          <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                      </div>
+                      <span class="text-[10px] font-medium text-gray-400">
+                        Upload
+                      </span>
+                    </button>
+                    <button
+                      class="flex flex-col items-center gap-2 p-3 bg-[#121215] rounded-2xl border border-white/5 hover:bg-[#1A1A1E] transition-colors">
+                      <div
+                        class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"></path>
+                          <path d="m12 19-7-7 7-7"></path>
+                        </svg>
+                      </div>
+                      <span class="text-[10px] font-medium text-gray-400">
+                        Verify
+                      </span>
+                    </button>
+                    <button
+                      class="flex flex-col items-center gap-2 p-3 bg-[#121215] rounded-2xl border border-white/5 hover:bg-[#1A1A1E] transition-colors">
+                      <div
+                        class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                          <line x1="2" x2="22" y1="10" y2="10"></line>
+                        </svg>
+                      </div>
+                      <span class="text-[10px] font-medium text-gray-400">
+                        API
+                      </span>
+                    </button>
+                    <button
+                      class="flex flex-col items-center gap-2 p-3 bg-[#121215] rounded-2xl border border-white/5 hover:bg-[#1A1A1E] transition-colors">
+                      <div
+                        class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" x2="12" y1="8" y2="16"></line>
+                          <line x1="8" x2="16" y1="12" y2="12"></line>
+                        </svg>
+                      </div>
+                      <span class="text-[10px] font-medium text-gray-400">
+                        Support
+                      </span>
+                    </button>
+                  </div>
+
+                  <!-- Assets List -->
+                  <div class="bg-[#121215] rounded-3xl p-5 border border-white/[0.08] relative">
+                    <div class="flex justify-between items-center mb-5">
+                      <h2 class="text-base font-semibold text-white tracking-tight">
+                        Active Models
+                      </h2>
+                      <button class="text-xs font-medium text-blue-400 hover:text-blue-300">
+                        View all
+                      </button>
+                    </div>
+                    <div class="space-y-4">
+                      <!-- Asset 1 -->
+                      <div class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="w-9 h-9 rounded-full bg-[#1E1E22] flex items-center justify-center ring-1 ring-white/10 group-hover:ring-orange-500/50 transition-all">
+                            <div
+                              class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-semibold">
+                              ₿
+                            </div>
+                          </div>
+                          <div>
+                            <h3 class="text-sm font-medium text-white">
+                              Tamil Model
+                            </h3>
+                            <p class="text-[10px] text-gray-500">v2.4.1</p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-sm font-medium text-white">
+                            Active
+                          </p>
+                          <p class="text-[10px] text-green-400">99.2% Acc</p>
+                        </div>
+                      </div>
+                      <!-- Asset 2 -->
+                      <div class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="w-9 h-9 rounded-full bg-[#1E1E22] flex items-center justify-center ring-1 ring-white/10 group-hover:ring-blue-500/50 transition-all">
+                            <div
+                              class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white font-semibold">
+                              Ξ
+                            </div>
+                          </div>
+                          <div>
+                            <h3 class="text-sm font-medium text-white">
+                              Hindi Model
+                            </h3>
+                            <p class="text-[10px] text-gray-500">v3.0.0</p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-sm font-medium text-white">
+                            Active
+                          </p>
+                          <p class="text-[10px] text-green-400">98.9% Acc</p>
+                        </div>
+                      </div>
+                      <!-- Asset 3 -->
+                      <div class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="w-9 h-9 rounded-full bg-[#1E1E22] flex items-center justify-center ring-1 ring-white/10 group-hover:ring-purple-500/50 transition-all">
+                            <div
+                              class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-[8px] text-white font-semibold">
+                              S
+                            </div>
+                          </div>
+                          <div>
+                            <h3 class="text-sm font-medium text-white">
+                              English Model
+                            </h3>
+                            <p class="text-[10px] text-gray-500">v1.8.4</p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-sm font-medium text-white">
+                            Active
+                          </p>
+                          <p class="text-[10px] text-green-400">99.5% Acc</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="w-full z-20 pt-0 px-6 pb-6 absolute bottom-0">
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent pointer-events-none">
+                  </div>
+                  <div class="relative flex justify-between items-end">
+                    <button class="flex flex-col items-center gap-1.5 -mb-2 text-white">
+                      <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-white/10 ring-4 ring-[#050505] transform -translate-y-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                          stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                      </div>
+                      <span class="text-[10px] font-semibold tracking-wide">
+                        Home
+                      </span>
+                    </button>
+
+                    <button
+                      class="flex flex-col items-center gap-1.5 pb-1 text-gray-500 hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                          d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1">
+                        </path>
+                        <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
+                      </svg>
+                      <span class="text-[10px] font-medium">Keys</span>
+                    </button>
+
+                    <button
+                      class="flex flex-col items-center gap-1.5 pb-1 text-gray-500 hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" x2="12" y1="20" y2="10"></line>
+                        <line x1="18" x2="18" y1="20" y2="4"></line>
+                        <line x1="6" x2="6" y1="20" y2="16"></line>
+                      </svg>
+                      <span class="text-[10px] font-medium">History</span>
+                    </button>
+
+                    <button
+                      class="flex flex-col items-center gap-1.5 pb-1 text-gray-500 hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="">
+                        <path
+                          d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.35a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                        </path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <span class="text-[10px] font-medium">Settings</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Text Content (Right) -->
+          <div class="flex flex-col md:flex-row md:items-end w-full gap-x-8 gap-y-8 justify-between">
+            <div class="flex flex-col gap-6 max-w-3xl">
+              <div class="flex gap-3 gap-x-3 gap-y-3 items-center scroll-item scroll-fade-up"
+                style="animation-play-state: running;">
+                <span
+                  class="flex items-center justify-center text-[11px] font-medium text-blue-400 font-mono bg-blue-500/10 w-7 h-7 border-blue-500/20 border rounded-lg shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                  02
+                </span>
+                <span class="uppercase text-sm font-medium text-gray-500 tracking-widest font-sans">
+                  Seamless Integration
+                </span>
+              </div>
+              <h2
+                class="md:text-5xl lg:text-6xl leading-[1.1] text-4xl text-white font-oswald font-light tracking-tight scroll-item scroll-fade-up delay-100"
+                style="animation-play-state: running;">
+                Built for Security.
+                <span class="text-gray-600 font-oswald font-light tracking-tight">
+                  Designed for Scale.
+                </span>
+              </h2>
+              <p class="leading-relaxed text-lg font-light text-gray-400 text-left mt-2 scroll-item scroll-fade-up delay-200"
+                style="animation-play-state: running;">
+                Protect your platform from voice fraud. Receive
+                structured JSON responses with confidence scores
+                and explanations in milliseconds.
+              </p>
+            </div>
+            <button
+              class="group flex items-center gap-2 pl-6 pr-5 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-all duration-200 font-sans whitespace-nowrap">
+              <span class="font-sans">View API Docs</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-arrow-right w-4 h-4 transition-transform group-hover:translate-x-1">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 border-0 gap-x-4 gap-y-4">
+          <!-- Feature 1 -->
+          <div
+            class="md:p-12 transition-colors group overflow-hidden z-0 bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl pt-8 pr-8 pb-8 pl-8 relative scroll-item scroll-fade-up"
+            style="animation-play-state: running;">
+            <!-- Background Gradient -->
+            <div
+              class="pointer-events-none z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute top-0 right-0 bottom-0 left-0">
+            </div>
+            <!-- Stars Effect -->
+            <div class="z-0 opacity-20 rounded-3xl absolute top-0 right-0 bottom-0 left-0"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px"></div>
+            <!-- Hover Overlay -->
+            <div
+              class="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            </div>
+
+            <div class="flex gap-6 items-start relative z-20">
+              <div
+                class="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-white/20 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-300 group-hover:text-white">
+                  <path d="M12 13v8"></path>
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                  <path d="m8 17 4-4 4 4"></path>
+                </svg>
+              </div>
+              <div class="">
+                <h3 class="text-2xl font-medium text-white tracking-tight mb-2">
+                  JSON Response
+                </h3>
+                <p class="text-[15px] leading-relaxed font-light text-gray-400">
+                  Get structured output with classification, confidence, and
+                  explanation instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div
+            class="md:p-12 transition-colors group overflow-hidden z-0 bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl pt-8 pr-8 pb-8 pl-8 relative scroll-item scroll-fade-up delay-100"
+            style="animation-play-state: running;">
+            <!-- Background Gradient -->
+            <div
+              class="pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute inset-0 z-0">
+            </div>
+            <!-- Stars Effect -->
+            <div class="absolute inset-0 opacity-20 z-0"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+            <!-- Hover Overlay -->
+            <div
+              class="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            </div>
+
+            <div class="flex gap-6 items-start relative z-20">
+              <div
+                class="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-white/20 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-300 group-hover:text-white">
+                  <circle cx="12" cy="12" r="10" class=""></circle>
+                  <line x1="2" x2="22" y1="12" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                  </path>
+                </svg>
+              </div>
+              <div class="">
+                <h3 class="text-2xl font-medium text-white tracking-tight mb-2">
+                  5+ Languages
+                </h3>
+                <p class="text-[15px] text-gray-400 leading-relaxed font-light font-sans">
+                  Native support for Tamil, English, Hindi, Malayalam, and Telugu
+                  voice samples.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div
+            class="md:p-12 transition-colors group overflow-hidden z-0 bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl pt-8 pr-8 pb-8 pl-8 relative scroll-item scroll-fade-up delay-200"
+            style="animation-play-state: running;">
+            <!-- Background Gradient -->
+            <div
+              class="pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute inset-0 z-0">
+            </div>
+            <!-- Stars Effect -->
+            <div class="z-0 opacity-20 absolute top-0 right-0 bottom-0 left-0"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px"></div>
+            <!-- Hover Overlay -->
+            <div
+              class="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            </div>
+
+            <div class="flex gap-6 items-start relative z-20">
+              <div
+                class="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-white/20 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-300 group-hover:text-white">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </div>
+              <div class="">
+                <h3 class="text-2xl font-medium text-white tracking-tight mb-2">
+                  Base64 Input
+                </h3>
+                <p class="text-[15px] text-gray-400 leading-relaxed font-light font-sans">
+                  Simple API integration: Send Base64-encoded MP3s directly
+                  to our endpoint.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 4 -->
+          <div
+            class="md:p-12 transition-colors group overflow-hidden z-0 bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl pt-8 pr-8 pb-8 pl-8 relative scroll-item scroll-fade-up delay-300"
+            style="animation-play-state: running;">
+            <!-- Background Gradient -->
+            <div
+              class="pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute inset-0 z-0">
+            </div>
+            <!-- Stars Effect -->
+            <div class="absolute inset-0 opacity-20 z-0"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+            <!-- Hover Overlay -->
+            <div
+              class="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            </div>
+
+            <div class="flex gap-6 items-start relative z-20">
+              <div
+                class="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-white/20 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-300 group-hover:text-white">
+                  <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                </svg>
+              </div>
+              <div class="">
+                <h3 class="text-2xl font-medium text-white tracking-tight mb-2">
+                  Real-time Processing
+                </h3>
+                <p class="text-[15px] text-gray-400 leading-relaxed font-light font-sans">
+                  Ultra-fast inference with sub-100ms response times for
+                  production-ready deployments.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="testimonials"
+        class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-24 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-end gap-8 w-full gap-x-8 gap-y-8 justify-between">
+          <div class="flex flex-col gap-6 max-w-3xl">
+            <div class="flex gap-3 gap-x-3 gap-y-3 items-center scroll-item scroll-fade-up"
+              style="animation-play-state: running;">
+              <span
+                class="flex items-center justify-center text-[11px] font-medium text-blue-400 font-mono bg-blue-500/10 w-7 h-7 border-blue-500/20 border rounded-lg shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                03
+              </span>
+              <span class="uppercase text-sm font-medium text-gray-500 tracking-widest font-sans">
+                Testimonials
+              </span>
+            </div>
+            <h2
+              class="md:text-5xl lg:text-6xl leading-[1.1] text-4xl text-white font-oswald font-light tracking-tight scroll-item scroll-fade-up delay-100"
+              style="animation-play-state: running;">
+              Trusted by developers.
+              <span class="text-gray-600 font-oswald font-light tracking-tight">
+                Loved by security teams.
+              </span>
+            </h2>
+            <p class="text-lg text-gray-400 font-light max-w-xl leading-relaxed font-sans scroll-item scroll-fade-up delay-200"
+              style="animation-play-state: running;">
+              Join developers and security professionals who trust Truthy
+              to protect their platforms from AI-generated voice fraud.
+            </p>
+          </div>
+          <button
+            class="group flex items-center gap-2 pl-6 pr-5 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-all duration-200 font-sans whitespace-nowrap">
+            <span class="font-sans">View Case Studies</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-arrow-right w-4 h-4 transition-transform group-hover:translate-x-1">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Testimonials Carousel -->
+        <div
+          class="overflow-hidden flex flex-col md:p-16 lg:flex-row lg:gap-20 lg:pt-4 lg:pb-4 lg:pl-4 lg:pr-8 bg-[#0A0A0C] w-full max-w-6xl border-white/10 border rounded-3xl mr-auto ml-auto pt-8 pr-8 pb-8 pl-8 relative shadow-2xl gap-x-12 gap-y-12 items-center scroll-item scroll-blur-in delay-300"
+          style="animation-play-state: running;">
+          <!-- Pricing Card Background -->
+          <div
+            class="pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute top-0 right-0 bottom-0 left-0 z-0">
+          </div>
+          <div class="z-0 opacity-20 absolute top-0 right-0 bottom-0 left-0"
+            style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px"></div>
+
+          <!-- Image Section -->
+          <div class="lg:w-[55%] flex min-h-[420px] md:min-h-[520px] w-full relative items-center justify-center z-10">
+            <div
+              class="z-10 md:w-[420px] md:h-[420px] lg:w-[480px] lg:h-[480px] group cursor-pointer overflow-hidden bg-white/5 w-80 h-80 border-0 rounded-[2.5rem] pt-1 pr-1 pb-1 pl-1 relative shadow-2xl">
+              <img
+                src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/59c85ed7-9ae4-40eb-88bf-fa793ae1de22_1600w.webp"
+                alt="User Profile"
+                class="transform transition-transform duration-700 group-hover:scale-105 w-full h-full object-cover rounded-[2.2rem]"
+                id="testimonial-img">
+            </div>
+          </div>
+
+          <!-- Content Section -->
+          <div class="lg:w-1/2 flex flex-col z-10 w-full relative">
+            <div class="mb-6 text-indigo-500">
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.01697 21L5.01697 18C5.01697 16.8954 5.9124 16 7.01697 16H10.017C10.5693 16 11.017 15.5523 11.017 15V9C11.017 8.44772 10.5693 8 10.017 8H6.01697C5.46468 8 5.01697 8.44772 5.01697 9V11C5.01697 11.5523 4.56925 12 4.01697 12H3.01697V5H13.017V15C13.017 18.3137 10.3307 21 7.01697 21H5.01697Z">
+                </path>
+              </svg>
+            </div>
+
+            <blockquote
+              class="leading-tight transition-opacity duration-300 md:text-5xl text-2xl font-light text-white font-oswald mb-8"
+              id="testimonial-quote">
+              "Truthy detected a deepfake scam call targeting our customer support. The multi-language detection is
+              phenomenal—works perfectly for our Tamil and Hindi speaking users!"
+            </blockquote>
+
+            <div class="flex flex-row items-center justify-between gap-4 border-t border-white/10 pt-8">
+              <div class="">
+                <h4 class="leading-none text-xl font-semibold text-white" id="testimonial-name">
+                  Priya Sharma
+                </h4>
+                <p id="testimonial-role" class="text-sm md:text-base text-gray-500 mt-2 font-light">
+                  Security Lead, TechVault India
+                </p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button onclick="window.prevTestimonial()"
+                  class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-indigo-600 transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"></path>
+                  </svg>
+                </button>
+                <button onclick="window.nextTestimonial()"
+                  class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-indigo-600 transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonial slider is in /static/js/script.js -->
+        </div>
+      </div>
+
+      <div id="pricing"
+        class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-24 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 w-full">
+          <div class="flex flex-col gap-6 max-w-3xl">
+            <div class="flex gap-3 items-center scroll-item scroll-fade-up" style="animation-play-state: running;">
+              <span
+                class="flex items-center justify-center text-[11px] font-medium text-blue-400 font-mono bg-blue-500/10 w-7 h-7 border-blue-500/20 border rounded-lg shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                04
+              </span>
+              <span class="uppercase text-sm font-medium text-gray-500 tracking-widest font-sans">
+                PRICING
+              </span>
+            </div>
+            <h2
+              class="md:text-5xl lg:text-6xl leading-[1.1] text-4xl text-white font-oswald font-light tracking-tight scroll-item scroll-fade-up delay-100"
+              style="animation-play-state: running;">
+              API pricing for
+              <span class="text-gray-600 font-oswald font-light tracking-tight">
+                every scale.
+              </span>
+            </h2>
+            <p class="text-lg text-gray-400 font-light max-w-xl leading-relaxed font-sans scroll-item scroll-fade-up delay-200"
+              style="animation-play-state: running;">
+              Pay only for what you use. Get structured JSON responses with
+              classification, confidence scores, and explanations for every
+              voice sample you analyze.
+            </p>
+          </div>
+
+          <div class="z-10 flex flex-col items-center md:items-end relative">
+            <div class="flex bg-[#111111] border-white/10 border rounded-full p-1.5 backdrop-blur-sm items-center">
+              <button
+                class="transition-transform hover:scale-[1.02] text-sm font-semibold text-black bg-[#ffffff] rounded-full px-8 py-2.5 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+                Pay-as-you-go
+              </button>
+              <button
+                class="px-8 py-2.5 rounded-full text-gray-400 hover:text-white font-medium text-sm transition-colors font-sans">
+                Enterprise
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <section
+          class="flex flex-col overflow-hidden pt-0 pr-0 pb-0 pl-0 relative gap-x-12 gap-y-12 items-center justify-center">
+          <!-- Background Glow Effects -->
+          <div
+            class="pointer-events-none absolute top-0 right-0 bottom-0 left-0 gap-x-12 gap-y-12 scroll-item scroll-blur-in delay-300"
+            style="visibility: hidden; animation-play-state: running;">
+            <div
+              class="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-purple-500/30 to-transparent">
+            </div>
+            <div
+              class="w-px bg-gradient-to-b from-transparent via-purple-500/10 to-transparent opacity-50 absolute top-0 bottom-0 left-1/4 gap-x-12 gap-y-12">
+            </div>
+            <div
+              class="absolute right-1/4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-purple-500/10 to-transparent opacity-50">
+            </div>
+            <div class="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-purple-900/10 to-transparent opacity-30">
+            </div>
+          </div>
+
+          <!-- Header Section -->
+
+          <!-- Pricing Card -->
+          <div
+            class="overflow-hidden z-10 group bg-[#0A0A0C] w-full max-w-6xl border-white/10 border rounded-[3rem] relative shadow-2xl gap-x-12 gap-y-12">
+            <!-- Card Background -->
+            <div
+              class="pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C] absolute top-0 right-0 bottom-0 left-0 gap-x-12 gap-y-12">
+            </div>
+            <!-- Stars Effect -->
+            <div class="absolute inset-0 opacity-20"
+              style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle, black 40%, transparent 100%);">
+            </div>
+
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 md:p-16 min-h-[450px] pt-10 pr-10 pb-10 pl-10 relative gap-x-12 gap-y-12">
+              <!-- Left Column -->
+              <div class="flex flex-col gap-8 h-full gap-x-12 gap-y-12 items-start justify-between">
+                <!-- Icon & Title -->
+                <div class="flex items-center gap-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-sky-400">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z">
+                    </path>
+                    <path
+                      d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z">
+                    </path>
+                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.1 4-1 4-1s.25 2.25 0 4z"></path>
+                    <path d="M15 13v5s3.03-.55 4-2c1.1-1.62 1-4 1-4s-2.25-.25-4 0z"></path>
+                  </svg>
+                  <span class="text-3xl font-light text-white tracking-tight font-oswald">
+                    Developer Plan
+                  </span>
+                </div>
+
+                <!-- Price -->
+                <div class="mt-auto gap-x-12 gap-y-12">
+                  <div class="flex items-baseline gap-3 mb-2">
+                    <span class="text-9xl font-light text-white tracking-tight font-oswald">
+                      $0.01
+                    </span>
+                    <span class="text-3xl font-light text-white tracking-tight font-oswald opacity-90">
+                      / request
+                    </span>
+                  </div>
+                  <p class="text-gray-400 text-lg font-light font-sans">
+                    100 free requests monthly, then pay per use
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="flex flex-col justify-between h-full gap-10">
+                <!-- Features List -->
+                <ul class="space-y-6 pt-2">
+                  <li class="flex items-center gap-4 text-white text-xl font-light font-sans">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white shrink-0"></span>
+                    5+ Languages Supported
+                  </li>
+                  <li class="flex items-center gap-4 text-white text-xl font-light font-sans">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white shrink-0"></span>
+                    JSON Response with Confidence
+                  </li>
+                  <li class="flex items-center gap-4 text-white text-xl font-light font-sans">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white shrink-0"></span>
+                    Base64 MP3 Input
+                  </li>
+                  <li class="flex items-center gap-4 text-white text-xl font-light font-sans">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white shrink-0"></span>
+                    Sub-100ms Response Time
+                  </li>
+                </ul>
+
+                <!-- CTA Button -->
+                <div class="flex justify-start md:justify-end mt-auto pt-4">
+                  <button
+                    class="sm:w-auto hover:bg-blue-500/10 hover:border-blue-400 hover:shadow-[0_0_35px_rgba(59,130,246,0.6),inset_0_0_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white bg-black/60 w-full border-blue-500 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 shadow-[0_0_20px_rgba(59,130,246,0.5),inset_0_0_10px_rgba(59,130,246,0.2)] gap-x-2 gap-y-2 items-center justify-center">
+                    Get API Key
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- WHY US SECTION -->
+
+    <!-- TESTIMONIALS SECTION -->
+
+    <!-- PRICING SECTION -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/10 bg-[#050505] relative z-10 pt-20 pb-10">
+    <div class="w-full max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between gap-12 mb-20">
+        <div class="max-w-sm scroll-item scroll-fade-up" style="animation-play-state: running;">
+          <a href="#" class="inline-flex items-center justify-center"><img
+              src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65"
+              alt="Truthy" class="h-[40px] mb-4"></a>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6 font-sans">
+            Truthy is an advanced AI voice detection platform that identifies
+            synthetic speech across Tamil, English, Hindi, Malayalam, and Telugu.
+          </p>
+          <div class="flex gap-4">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-twitter">
+                <path
+                  d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z">
+                </path>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-github">
+                <path
+                  d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                </path>
+                <path d="M9 18c-4.51 2-5-2-7-2"></path>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-linkedin">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect width="4" height="12" x="2" y="9"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 w-full font-sans">
+          <div class="scroll-item scroll-fade-up delay-100" style="animation-play-state: running;">
+            <h4 class="text-white font-medium mb-4 font-sans">
+              Product
+            </h4>
+            <ul class="space-y-3 text-sm text-gray-400">
+              <li>
+                <a href="#api" class="hover:text-blue-400 transition-colors font-sans">
+                  API
+                </a>
+              </li>
+              <li>
+                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
+                  Languages
+                </a>
+              </li>
+              <li>
+                <a href="#pricing" class="hover:text-blue-400 transition-colors font-sans">
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
+                  Updates
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="scroll-item scroll-fade-up delay-200" style="animation-play-state: running;">
+            <h4 class="text-white font-medium mb-4 font-sans">
+              Resources
+            </h4>
+            <ul class="space-y-3 text-sm text-gray-400">
+              <li>
+                <a href="#api" class="hover:text-blue-400 transition-colors font-sans">
+                  Documentation
+                </a>
+              </li>
+              <li>
+                <a href="#api" class="hover:text-blue-400 transition-colors font-sans">
+                  API Reference
+                </a>
+              </li>
+              <li>
+                <a href="#testimonials" class="hover:text-blue-400 transition-colors font-sans">
+                  Community
+                </a>
+              </li>
+              <li>
+                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
+                  Help Center
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="scroll-item scroll-fade-up delay-300" style="animation-play-state: running;">
+            <h4 class="text-white font-medium mb-4 font-sans">
+              Company
+            </h4>
+            <ul class="space-y-3 text-sm text-gray-400">
+              <li>
+                <a href="#testimonials" class="hover:text-blue-400 transition-colors font-sans">
+                  About
+                </a>
+              </li>
+              <li class="">
+                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
+                  Blog
+                </a>
+              </li>
+              <li class="">
+                <a href="#testimonials" class="hover:text-blue-400 transition-colors font-sans">
+                  Careers
+                </a>
+              </li>
+              <li>
+                <a href="#pricing" class="hover:text-blue-400 transition-colors font-sans">
+                  Legal
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="scroll-item scroll-fade-up delay-500" style="animation-play-state: running;">
+            <h4 class="text-white font-medium mb-4 font-sans">
+              Legal
+            </h4>
+            <ul class="space-y-3 text-sm text-gray-400">
+              <li>
+                <a href="#" class="hover:text-blue-400 transition-colors font-sans">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 transition-colors font-sans">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 transition-colors font-sans">
+                  Cookie Policy
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-gray-500 font-sans">
+          © 2026 Truthy AI. All rights reserved.
+        </p>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span class="text-xs text-gray-400 font-sans">
+            All systems normal
+          </span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Upload Modal -->
+  <div id="upload-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 [&.active]:opacity-100 [&.active]:pointer-events-auto">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+    <!-- Modal Content -->
+    <div
+      class="relative w-full max-w-lg bg-[#0A0A0C] border border-white/10 rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300 [.active_&]:scale-100">
+      <!-- Close Button -->
+      <button data-close-modal
+        class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors text-gray-400 hover:text-white z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-6 pb-0">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-darkgrey-500/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="text-white-400">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-white font-sans">Analyze Voice</h2>
+            <p class="text-sm text-gray-400">Detect AI-generated speech</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+        <!-- Language Selector -->
+        <div class="mb-4">
+          <label for="language-select" class="block text-sm font-medium text-gray-300 mb-2">Language</label>
+          <select id="language-select"
+            class="w-full bg-[#1A1A1E] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+            <option value="English">English</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Malayalam">Malayalam</option>
+            <option value="Telugu">Telugu</option>
+          </select>
+        </div>
+
+        <!-- Drop Zone -->
+        <div id="drop-zone"
+          class="relative border-2 border-dashed border-white/20 hover:border-blue-500/50 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 [&.drag-over]:border-blue-500 [&.drag-over]:bg-blue-500/5">
+          <input type="file" id="audio-file-input" accept="audio/*,.mp3,.wav,.m4a" class="hidden">
+
+          <!-- Default State -->
+          <div id="drop-zone-text" class="space-y-3">
+            <div class="w-14 h-14 mx-auto rounded-full bg-white/5 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="text-gray-400">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-300 font-medium">Drop your audio file here</p>
+              <p class="text-sm text-gray-500 mt-1">or click to browse</p>
+            </div>
+            <p class="text-xs text-gray-600">Supports MP3 (max 50MB)</p>
+          </div>
+
+          <!-- File Selected State -->
+          <div id="selected-file-info" class="hidden space-y-2">
+            <div class="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="text-green-400">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+              </svg>
+            </div>
+            <p id="selected-file-name" class="text-white font-medium truncate"></p>
+            <p id="selected-file-size" class="text-sm text-gray-500"></p>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <p id="upload-error" class="hidden mt-3 text-sm text-red-400 text-center"></p>
+
+        <!-- Analyze Button - Disabled State (How It Works style) -->
+        <button id="analyze-btn-disabled"
+          class="w-full mt-4 hover:bg-blue-500/10 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.3),inset_0_0_8px_rgba(59,130,246,0.15)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white/50 bg-black/60 border-white/20 border rounded-full py-3.5 px-8 shadow-none gap-2 items-center justify-center cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+          <span class="font-sans">Analyze Voice</span>
+        </button>
+
+        <!-- Analyze Button - Enabled State (Initial CTA style) -->
+        <button id="analyze-btn"
+          class="hidden w-full mt-4 flex group overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] focus:outline-none text-sm font-medium text-white h-[54px] rounded-full py-4 px-8 relative items-center justify-center"
+          style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2)); --border-radius-before: 9999px">
+
+          <!-- Full Border Beam (Clean Blue Line) -->
+          <div class="absolute inset-0 -z-20 rounded-full overflow-hidden p-[1px]">
+            <div class="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,#3b82f6_360deg)]"
+              style="animation: beam-spin 3s linear infinite;"></div>
+            <div class="absolute inset-[1px] rounded-full bg-[#0A0A0C]"></div>
+          </div>
+
+          <!-- Inner Background & Effects -->
+          <div class="overflow-hidden bg-[#0A0A0A] rounded-full absolute top-[2px] right-[2px] bottom-[2px] left-[2px]">
+            <!-- Gradient Background -->
+            <div class="bg-gradient-to-b from-blue-900/20 to-transparent absolute top-0 right-0 bottom-0 left-0"></div>
+
+            <!-- Vertical Lines Animation (Smaller & Monotone) -->
+            <div class="opacity-[0.07] mix-blend-plus-lighter absolute top-0 right-0 bottom-0 left-0"
+              style="background-image: repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 1px, transparent 8px);  background-size: 24px 100%;  animation: lines-slide 1.5s linear infinite; position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0))">
+            </div>
+
+            <!-- Blue Glow on Hover -->
+            <div
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-1/2 bg-blue-500/20 blur-2xl rounded-full pointer-events-none transition-colors duration-500 group-hover:bg-blue-500/40">
+            </div>
+          </div>
+
+          <!-- Content -->
+          <span
+            class="transition-colors group-hover:text-white uppercase font-semibold text-white/90 tracking-tight z-10 relative font-sans">
+            Analyze Voice
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-arrow-right relative z-10 ml-2 transition-transform duration-300 group-hover:translate-x-1">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden mt-6 p-4 bg-[#1A1A1E] border border-white/10 rounded-2xl">
+          <div class="flex items-start gap-4 mb-4">
+            <div id="result-icon" class="shrink-0 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+              <!-- Icon will be injected by JS -->
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="result-classification" class="text-2xl font-bold text-green-400">Human Voice</p>
+              <p class="text-sm text-gray-400 mt-1">
+                <span class="text-white font-medium" id="result-confidence">95%</span> confidence ·
+                <span id="result-language">English</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Confidence Bar -->
+          <div class="h-2 bg-white/5 rounded-full overflow-hidden mb-4">
+            <div id="confidence-bar"
+              class="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
+              style="width: 0%"></div>
+          </div>
+
+          <!-- Explanation -->
+          <p id="result-explanation" class="text-sm text-gray-400 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Script -->
+  <script src="/static/js/script.js"></script>
+
+</body>
+
+</html>
