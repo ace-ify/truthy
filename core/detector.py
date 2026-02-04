@@ -26,24 +26,60 @@ class DeepfakeDetector:
         self._load_model()
     
     def _load_model(self):
-        """Load the deepfake detection model and feature extractor."""
+        """Load the deepfake detection model with memory optimizations."""
+        import gc
         print(f"Loading model: {self.model_id}...")
-        print(f"Using device: {self.device}")
+        print(f"Using device: {self.device} (CPU forced for memory efficiency)")
         
-        # Load feature extractor and model
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(self.model_id)
-        self.model = AutoModelForAudioClassification.from_pretrained(self.model_id)
-        self.model.to(self.device)
-        self.model.eval()
-        
-        # Resolve label indices
-        id2label = self.model.config.id2label
-        for idx, label in id2label.items():
-            label_lower = label.lower()
-            if any(term in label_lower for term in ["fake", "spoof", "deepfake", "synthetic", "ai"]):
-                self.ai_index = idx
-            if any(term in label_lower for term in ["real", "bonafide", "human", "genuine"]):
-                self.human_index = idx
+        # Explicitly clear any existing memory
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            
+        try:
+            # Load feature extractor
+            self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+                self.model_id,
+                trust_remote_code=True
+            )
+            
+            # Load model with memory-efficient flags
+            print("📦 Compressing model weights (Dynamic Quantization)...")
+            self.model = AutoModelForAudioClassification.from_pretrained(
+                self.model_id,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True
+            )
+            
+            # Apply Dynamic Quantization (Int8)
+            # This is key to fitting 1.2GB model into 512MB RAM
+            self.model = torch.quantization.quantize_dynamic(
+                self.model, 
+                {torch.nn.Linear}, 
+                dtype=torch.qint8
+            )
+            
+            # Ensure model is on CPU (Quantization is CPU-optimized)
+            self.model.to("cpu")
+            self.model.eval()
+            
+            # Final cleanup
+            gc.collect()
+            
+            # Resolve label indices
+            id2label = self.model.config.id2label
+            for idx, label in id2label.items():
+                label_lower = label.lower()
+                if any(term in label_lower for term in ["fake", "spoof", "deepfake", "synthetic", "ai"]):
+                    self.ai_index = idx
+                if any(term in label_lower for term in ["real", "bonafide", "human", "genuine"]):
+                    self.human_index = idx
+                    
+        except Exception as e:
+            print(f"Error loading detector model: {e}")
+            raise e
+            
+        print("✅ Deepfake detector loaded successfully.")
         
         # Fallback if labels not found (generic LABEL_0, LABEL_1)
         # For ASVSpoof5 models: 0 = spoof (AI), 1 = bonafide (human)
