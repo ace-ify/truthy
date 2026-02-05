@@ -1,8 +1,8 @@
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 python-multipart>=0.0.6
-torch>=2.0.0
-torchaudio>=2.0.0
+# NOTE: torch and torchaudio are installed separately in Dockerfile (CPU-only version)
+# Do NOT add torch/torchaudio here - it will install the CUDA version (~2GB extra)
 transformers>=4.35.0
 soundfile>=0.12.1
 librosa>=0.10.1
