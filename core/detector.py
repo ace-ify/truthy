@@ -2,13 +2,14 @@
 Deepfake audio detector using WavLM-based model.
 Primary: HuggingFace Inference API (no local memory needed)
 Fallback: Local model loading with quantization
+
+IMPORTANT: This module uses LAZY IMPORTS to minimize memory usage
+when running in API-only mode (no torch needed for cloud inference).
 """
-import torch
 import numpy as np
 import requests
 import os
 import io
-import soundfile as sf
 from typing import Tuple, Optional
 from pathlib import Path
 
@@ -27,7 +28,7 @@ class DeepfakeDetector:
         self.model_id = model_id
         self.model = None
         self.feature_extractor = None
-        self.device = torch.device("cpu")  # Always CPU for this use case
+        self.device = None  # Set later only if using local mode
         self.ai_index = None
         self.human_index = None
         self.use_api = False  # Will be set during initialization
@@ -55,34 +56,42 @@ class DeepfakeDetector:
         else:
             print("⚠️ No HF_TOKEN found. Attempting local model load...")
         
-        # Fallback to local model
+        # Fallback to local model (this imports torch)
         self._load_model_local()
     
     def _test_api(self) -> bool:
         """Test if the HuggingFace Inference API is working."""
         try:
             headers = {"Authorization": f"Bearer {self.hf_token}"}
-            # Send a minimal test request
+            # Send a minimal test request with timeout
             response = requests.post(
                 self.HF_API_URL,
                 headers=headers,
                 json={"inputs": "test"},
-                timeout=10
+                timeout=15
             )
+            print(f"   API test response: {response.status_code}")
             # API returns 200 or 503 (model loading) - both are acceptable
             if response.status_code in [200, 503]:
                 return True
-            print(f"   API returned status: {response.status_code}")
+            print(f"   Unexpected API status: {response.status_code} - {response.text[:200]}")
             return False
         except Exception as e:
             print(f"   API test error: {e}")
             return False
     
     def _load_model_local(self):
-        """Load the deepfake detection model locally with memory optimizations."""
+        """Load the deepfake detection model locally with memory optimizations.
+        
+        NOTE: This imports torch and transformers only when needed (lazy import).
+        """
+        # LAZY IMPORTS - only load heavy libraries if we need local mode
+        print("📦 Loading PyTorch and Transformers (local mode)...")
+        import torch
         from transformers import AutoModelForAudioClassification, AutoFeatureExtractor
         import gc
         
+        self.device = torch.device("cpu")
         print(f"📦 Loading model locally: {self.model_id}...")
         print(f"   Using device: {self.device}")
         
@@ -139,6 +148,8 @@ class DeepfakeDetector:
     
     def _predict_api(self, audio: np.ndarray, sr: int) -> Tuple[float, str]:
         """Predict using HuggingFace Inference API."""
+        import soundfile as sf
+        
         # Convert audio to WAV bytes
         buffer = io.BytesIO()
         sf.write(buffer, audio, sr, format='WAV')
@@ -150,42 +161,51 @@ class DeepfakeDetector:
         # Retry logic for model loading (503 status)
         max_retries = 3
         for attempt in range(max_retries):
-            response = requests.post(
-                self.HF_API_URL,
-                headers=headers,
-                data=audio_bytes,
-                timeout=60
-            )
-            
-            if response.status_code == 200:
-                results = response.json()
-                # Parse API response
-                # Format: [{"label": "LABEL_0", "score": 0.95}, {"label": "LABEL_1", "score": 0.05}]
-                ai_prob = 0.0
-                for item in results:
-                    label = item.get("label", "").lower()
-                    score = item.get("score", 0.0)
-                    # Check if this is the AI/fake label
-                    if any(term in label for term in ["fake", "spoof", "deepfake", "synthetic", "ai", "label_0", "0"]):
-                        ai_prob = score
-                        break
+            try:
+                response = requests.post(
+                    self.HF_API_URL,
+                    headers=headers,
+                    data=audio_bytes,
+                    timeout=120
+                )
                 
-                label = "AI" if ai_prob > AI_THRESHOLD else "Human"
-                return ai_prob, label
-                
-            elif response.status_code == 503:
-                # Model is loading, wait and retry
-                print(f"   ⏳ Model loading on HF servers... (attempt {attempt + 1}/{max_retries})")
-                import time
-                time.sleep(20)  # Wait for model to load
-            else:
-                print(f"   ❌ API error: {response.status_code} - {response.text}")
+                if response.status_code == 200:
+                    results = response.json()
+                    # Parse API response
+                    # Format: [{"label": "LABEL_0", "score": 0.95}, {"label": "LABEL_1", "score": 0.05}]
+                    ai_prob = 0.0
+                    for item in results:
+                        label = item.get("label", "").lower()
+                        score = item.get("score", 0.0)
+                        # Check if this is the AI/fake label
+                        if any(term in label for term in ["fake", "spoof", "deepfake", "synthetic", "ai", "label_0", "0"]):
+                            ai_prob = score
+                            break
+                    
+                    label = "AI" if ai_prob > AI_THRESHOLD else "Human"
+                    return ai_prob, label
+                    
+                elif response.status_code == 503:
+                    # Model is loading, wait and retry
+                    print(f"   ⏳ Model loading on HF servers... (attempt {attempt + 1}/{max_retries})")
+                    import time
+                    time.sleep(20)  # Wait for model to load
+                else:
+                    print(f"   ❌ API error: {response.status_code} - {response.text[:200]}")
+                    break
+            except requests.exceptions.Timeout:
+                print(f"   ⏱️ Request timed out (attempt {attempt + 1}/{max_retries})")
+                continue
+            except Exception as e:
+                print(f"   ❌ API exception: {e}")
                 break
         
         raise Exception(f"HuggingFace API failed after {max_retries} attempts")
     
     def _predict_local(self, audio: np.ndarray, sr: int) -> Tuple[float, str]:
         """Predict using local model."""
+        import torch
+        
         inputs = self.feature_extractor(
             audio, 
             sampling_rate=sr, 
