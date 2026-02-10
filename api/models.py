@@ -53,9 +53,9 @@ class VoiceDetectionRequest(BaseModel):
         ..., 
         description="Language of the audio: Tamil, English, Hindi, Malayalam, or Telugu"
     )
-    audioFormat: Literal["mp3"] = Field(
+    audioFormat: Literal["mp3", "wav"] = Field(
         default="mp3",
-        description="Audio format (always mp3)"
+        description="Audio format (mp3 or wav)"
     )
     audioBase64: str = Field(
         ..., 

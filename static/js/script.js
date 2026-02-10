@@ -64,7 +64,7 @@ const VoiceDetectionAPI = {
         },
         body: JSON.stringify({
           language: language,
-          audioFormat: 'mp3',
+          audioFormat: file.type?.includes('wav') ? 'wav' : 'mp3',
           audioBase64: audioBase64
         })
       });
@@ -95,6 +95,285 @@ const VoiceDetectionAPI = {
 };
 
 // ==========================================================================
+// Voice Recorder Controller
+// ==========================================================================
+const VoiceRecorder = {
+  mediaRecorder: null,
+  audioChunks: [],
+  audioBlob: null,
+  audioUrl: null,
+  stream: null,
+  audioContext: null,
+  analyserNode: null,
+  animationId: null,
+  timerInterval: null,
+  recordingSeconds: 0,
+  isRecording: false,
+
+  // Get all DOM elements
+  getElements() {
+    return {
+      micBtn: document.getElementById('record-mic-btn'),
+      micIcon: document.getElementById('mic-icon'),
+      stopIcon: document.getElementById('stop-icon'),
+      ring1: document.getElementById('record-ring-1'),
+      ring2: document.getElementById('record-ring-2'),
+      timer: document.getElementById('record-timer'),
+      status: document.getElementById('record-status'),
+      waveformContainer: document.getElementById('waveform-container'),
+      canvas: document.getElementById('waveform-canvas'),
+      idleState: document.getElementById('record-idle-state'),
+      playbackState: document.getElementById('record-playback-state'),
+      playbackAudio: document.getElementById('recording-playback'),
+      durationLabel: document.getElementById('recording-duration'),
+      reRecordBtn: document.getElementById('re-record-btn'),
+    };
+  },
+
+  init() {
+    const els = this.getElements();
+    if (!els.micBtn) return;
+
+    els.micBtn.addEventListener('click', () => this.toggleRecording());
+    els.reRecordBtn?.addEventListener('click', () => this.resetToIdle());
+  },
+
+  async toggleRecording() {
+    if (this.isRecording) {
+      this.stopRecording();
+    } else {
+      await this.startRecording();
+    }
+  },
+
+  async startRecording() {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      UploadModal.showError('Microphone access denied. Please allow microphone access and try again.');
+      return;
+    }
+
+    this.isRecording = true;
+    this.audioChunks = [];
+    this.recordingSeconds = 0;
+
+    // Set up MediaRecorder
+    this.mediaRecorder = new MediaRecorder(this.stream);
+    this.mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) this.audioChunks.push(e.data);
+    };
+    this.mediaRecorder.onstop = () => this.onRecordingComplete();
+    this.mediaRecorder.start();
+
+    // Set up audio context for waveform
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = this.audioContext.createMediaStreamSource(this.stream);
+    this.analyserNode = this.audioContext.createAnalyser();
+    this.analyserNode.fftSize = 256;
+    source.connect(this.analyserNode);
+
+    // Update UI to recording state
+    const els = this.getElements();
+    els.micIcon.classList.add('hidden');
+    els.stopIcon.classList.remove('hidden');
+    els.micBtn.classList.add('bg-red-500/20', 'border-red-500/50', 'shadow-[0_0_20px_rgba(239,68,68,0.3)]');
+    els.ring1.classList.remove('hidden');
+    els.ring2.classList.remove('hidden');
+    els.status.textContent = 'Recording...';
+    els.status.classList.remove('text-gray-500');
+    els.status.classList.add('text-red-400');
+    els.waveformContainer.classList.remove('hidden');
+
+    // Start timer
+    this.timerInterval = setInterval(() => {
+      this.recordingSeconds++;
+      const mins = Math.floor(this.recordingSeconds / 60);
+      const secs = this.recordingSeconds % 60;
+      els.timer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+
+    // Start waveform drawing
+    this.drawWaveform();
+  },
+
+  stopRecording() {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+    }
+    this.isRecording = false;
+
+    // Stop all tracks
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.stream = null;
+    }
+
+    // Stop timer & animation
+    clearInterval(this.timerInterval);
+    cancelAnimationFrame(this.animationId);
+
+    // Close audio context
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
+
+    // Reset recording UI elements
+    const els = this.getElements();
+    els.micIcon.classList.remove('hidden');
+    els.stopIcon.classList.add('hidden');
+    els.micBtn.classList.remove('bg-red-500/20', 'border-red-500/50', 'shadow-[0_0_20px_rgba(239,68,68,0.3)]');
+    els.ring1.classList.add('hidden');
+    els.ring2.classList.add('hidden');
+    els.waveformContainer.classList.add('hidden');
+  },
+
+  async onRecordingComplete() {
+    this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+    this.audioUrl = URL.createObjectURL(this.audioBlob);
+
+    const els = this.getElements();
+    const mins = Math.floor(this.recordingSeconds / 60);
+    const secs = this.recordingSeconds % 60;
+    const durationStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    // Switch to playback state
+    els.idleState.classList.add('hidden');
+    els.playbackState.classList.remove('hidden');
+    els.durationLabel.textContent = `Recording — ${durationStr}`;
+    els.playbackAudio.src = this.audioUrl;
+
+    // Convert WebM to WAV so the backend (librosa) can process it
+    try {
+      const wavBlob = await this.convertToWav(this.audioBlob);
+      const file = new File([wavBlob], `recording_${Date.now()}.wav`, { type: 'audio/wav' });
+      UploadModal.selectedFile = file;
+    } catch (err) {
+      console.error('WAV conversion failed, using WebM:', err);
+      const file = new File([this.audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' });
+      UploadModal.selectedFile = file;
+    }
+
+    // Show the enabled analyze button
+    if (UploadModal.analyzeBtnDisabled) UploadModal.analyzeBtnDisabled.classList.add('hidden');
+    if (UploadModal.analyzeBtn) UploadModal.analyzeBtn.classList.remove('hidden');
+
+    UploadModal.hideError();
+  },
+
+  async convertToWav(blob) {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+
+    // Encode AudioBuffer to 16-bit PCM WAV
+    const numChannels = 1; // mono
+    const sampleRate = audioBuffer.sampleRate;
+    const samples = audioBuffer.getChannelData(0);
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+
+    // WAV header
+    const writeString = (offset, str) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + samples.length * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);           // chunk size
+    view.setUint16(20, 1, true);            // PCM format
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true); // byte rate
+    view.setUint16(32, numChannels * 2, true); // block align
+    view.setUint16(34, 16, true);           // bits per sample
+    writeString(36, 'data');
+    view.setUint32(40, samples.length * 2, true);
+
+    // Write PCM samples
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  },
+
+  drawWaveform() {
+    const els = this.getElements();
+    const canvas = els.canvas;
+    if (!canvas || !this.analyserNode) return;
+
+    const ctx = canvas.getContext('2d');
+    const bufferLength = this.analyserNode.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Set canvas internal resolution
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+
+    const draw = () => {
+      this.animationId = requestAnimationFrame(draw);
+      this.analyserNode.getByteFrequencyData(dataArray);
+
+      ctx.fillStyle = 'rgba(10, 10, 12, 0.85)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLength) * 1.5;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+        const hue = 220 + (dataArray[i] / 255) * 30; // blue range
+        const opacity = 0.4 + (dataArray[i] / 255) * 0.6;
+        ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${opacity})`;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+        x += barWidth;
+      }
+    };
+    draw();
+  },
+
+  resetToIdle() {
+    const els = this.getElements();
+
+    // Clean up audio URL
+    if (this.audioUrl) {
+      URL.revokeObjectURL(this.audioUrl);
+      this.audioUrl = null;
+    }
+    this.audioBlob = null;
+    this.audioChunks = [];
+    this.recordingSeconds = 0;
+
+    // Reset UI
+    els.playbackState.classList.add('hidden');
+    els.idleState.classList.remove('hidden');
+    els.timer.textContent = '0:00';
+    els.status.textContent = 'Click to start recording';
+    els.status.classList.remove('text-red-400');
+    els.status.classList.add('text-gray-500');
+    if (els.playbackAudio) els.playbackAudio.src = '';
+
+    // Reset selected file & button
+    UploadModal.selectedFile = null;
+    if (UploadModal.analyzeBtn) UploadModal.analyzeBtn.classList.add('hidden');
+    if (UploadModal.analyzeBtnDisabled) UploadModal.analyzeBtnDisabled.classList.remove('hidden');
+  },
+
+  destroy() {
+    // Full cleanup when modal closes
+    if (this.isRecording) this.stopRecording();
+    this.resetToIdle();
+  }
+};
+
+// ==========================================================================
 // Upload Modal Controller
 // ==========================================================================
 const UploadModal = {
@@ -106,6 +385,7 @@ const UploadModal = {
   analyzeBtnDisabled: null,
   resultsSection: null,
   selectedFile: null,
+  activeTab: 'upload',
 
   init() {
     this.modal = document.getElementById('upload-modal');
@@ -119,6 +399,7 @@ const UploadModal = {
     if (!this.modal) return;
 
     this.setupEventListeners();
+    VoiceRecorder.init();
   },
 
   setupEventListeners() {
@@ -146,6 +427,12 @@ const UploadModal = {
         this.close();
       }
     });
+
+    // Tab switching
+    const tabUpload = document.getElementById('tab-upload');
+    const tabRecord = document.getElementById('tab-record');
+    tabUpload?.addEventListener('click', () => this.switchTab('upload'));
+    tabRecord?.addEventListener('click', () => this.switchTab('record'));
 
     // Drag and drop handling
     if (this.dropZone) {
@@ -189,6 +476,51 @@ const UploadModal = {
 
     // Analyze button
     this.analyzeBtn?.addEventListener('click', () => this.analyze());
+  },
+
+  switchTab(tab) {
+    this.activeTab = tab;
+    const tabUpload = document.getElementById('tab-upload');
+    const tabRecord = document.getElementById('tab-record');
+    const uploadContent = document.getElementById('upload-tab-content');
+    const recordContent = document.getElementById('record-tab-content');
+
+    if (tab === 'upload') {
+      tabUpload.classList.add('bg-white/10', 'text-white');
+      tabUpload.classList.remove('text-gray-400');
+      tabRecord.classList.remove('bg-white/10', 'text-white');
+      tabRecord.classList.add('text-gray-400');
+      uploadContent?.classList.remove('hidden');
+      recordContent?.classList.add('hidden');
+
+      // Clean up recorder when switching away
+      VoiceRecorder.destroy();
+    } else {
+      tabRecord.classList.add('bg-white/10', 'text-white');
+      tabRecord.classList.remove('text-gray-400');
+      tabUpload.classList.remove('bg-white/10', 'text-white');
+      tabUpload.classList.add('text-gray-400');
+      recordContent?.classList.remove('hidden');
+      uploadContent?.classList.add('hidden');
+
+      // Reset upload state when switching away
+      this.resetUploadState();
+    }
+
+    // Reset analyze button when switching tabs
+    this.selectedFile = null;
+    if (this.analyzeBtn) this.analyzeBtn.classList.add('hidden');
+    if (this.analyzeBtnDisabled) this.analyzeBtnDisabled.classList.remove('hidden');
+    this.hideError();
+    this.hideResults();
+  },
+
+  resetUploadState() {
+    if (this.fileInput) this.fileInput.value = '';
+    const fileInfoEl = document.getElementById('selected-file-info');
+    const dropText = document.getElementById('drop-zone-text');
+    if (fileInfoEl) fileInfoEl.classList.add('hidden');
+    if (dropText) dropText.classList.remove('hidden');
   },
 
   handleFileSelect(file) {
@@ -238,7 +570,7 @@ const UploadModal = {
 
   async analyze() {
     if (!this.selectedFile) {
-      this.showError('Please select an audio file first');
+      this.showError('Please select or record an audio file first');
       return;
     }
 
@@ -359,10 +691,16 @@ const UploadModal = {
 
     if (fileInfoEl) fileInfoEl.classList.add('hidden');
     if (dropText) dropText.classList.remove('hidden');
-
+    
     // Show disabled button (How It Works style), hide enabled button
     if (this.analyzeBtn) this.analyzeBtn.classList.add('hidden');
     if (this.analyzeBtnDisabled) this.analyzeBtnDisabled.classList.remove('hidden');
+
+    // Clean up recorder
+    VoiceRecorder.destroy();
+
+    // Reset to upload tab
+    this.switchTab('upload');
 
     this.hideError();
     this.hideResults();

@@ -349,7 +349,8 @@ async def voice_detection(
             )
         
         # Save to temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+        file_ext = f".{request.audioFormat}"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
             temp_file.write(audio_bytes)
             temp_path = temp_file.name
         

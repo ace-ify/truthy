@@ -2083,42 +2083,128 @@
           </select>
         </div>
 
-        <!-- Drop Zone -->
-        <div id="drop-zone"
-          class="relative border-2 border-dashed border-white/20 hover:border-blue-500/50 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 [&.drag-over]:border-blue-500 [&.drag-over]:bg-blue-500/5">
-          <input type="file" id="audio-file-input" accept="audio/*,.mp3,.wav,.m4a" class="hidden">
+        <!-- Input Mode Tabs -->
+        <div class="flex gap-2 mb-4 bg-white/5 rounded-xl p-1">
+          <button id="tab-upload" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 bg-white/10 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload File
+          </button>
+          <button id="tab-record" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+            Record Voice
+          </button>
+        </div>
 
-          <!-- Default State -->
-          <div id="drop-zone-text" class="space-y-3">
-            <div class="w-14 h-14 mx-auto rounded-full bg-white/5 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                class="text-gray-400">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
+        <!-- Upload Tab Content -->
+        <div id="upload-tab-content">
+          <!-- Drop Zone -->
+          <div id="drop-zone"
+            class="relative border-2 border-dashed border-white/20 hover:border-blue-500/50 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 [&.drag-over]:border-blue-500 [&.drag-over]:bg-blue-500/5">
+            <input type="file" id="audio-file-input" accept="audio/*,.mp3,.wav,.m4a" class="hidden">
+
+            <!-- Default State -->
+            <div id="drop-zone-text" class="space-y-3">
+              <div class="w-14 h-14 mx-auto rounded-full bg-white/5 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-gray-400">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <div>
+                <p class="text-gray-300 font-medium">Drop your audio file here</p>
+                <p class="text-sm text-gray-500 mt-1">or click to browse</p>
+              </div>
+              <p class="text-xs text-gray-600">Supports MP3 (max 50MB)</p>
             </div>
-            <div>
-              <p class="text-gray-300 font-medium">Drop your audio file here</p>
-              <p class="text-sm text-gray-500 mt-1">or click to browse</p>
+
+            <!-- File Selected State -->
+            <div id="selected-file-info" class="hidden space-y-2">
+              <div class="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="text-green-400">
+                  <path d="M9 18V5l12-2v13"></path>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+              </div>
+              <p id="selected-file-name" class="text-white font-medium truncate"></p>
+              <p id="selected-file-size" class="text-sm text-gray-500"></p>
             </div>
-            <p class="text-xs text-gray-600">Supports MP3 (max 50MB)</p>
           </div>
+        </div>
 
-          <!-- File Selected State -->
-          <div id="selected-file-info" class="hidden space-y-2">
-            <div class="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                class="text-green-400">
-                <path d="M9 18V5l12-2v13"></path>
-                <circle cx="6" cy="18" r="3"></circle>
-                <circle cx="18" cy="16" r="3"></circle>
-              </svg>
+        <!-- Record Tab Content -->
+        <div id="record-tab-content" class="hidden">
+          <!-- Recording UI -->
+          <div class="border border-white/10 rounded-2xl p-6 text-center">
+
+            <!-- Idle / Recording State -->
+            <div id="record-idle-state">
+              <!-- Mic Button -->
+              <div class="relative flex items-center justify-center mb-4">
+                <!-- Animated rings (shown when recording) -->
+                <div id="record-ring-1" class="hidden absolute w-24 h-24 rounded-full border border-red-500/30 animate-ping"></div>
+                <div id="record-ring-2" class="hidden absolute w-20 h-20 rounded-full border border-red-500/20 animate-ping" style="animation-delay: 0.3s;"></div>
+                <button id="record-mic-btn" class="relative z-10 w-16 h-16 rounded-full bg-white/5 border border-white/20 flex items-center justify-center transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                  <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                  </svg>
+                  <svg id="stop-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-red-400 hidden">
+                    <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Timer -->
+              <p id="record-timer" class="text-2xl font-mono text-white/70 mb-1">0:00</p>
+              <p id="record-status" class="text-sm text-gray-500">Click to start recording</p>
+
+              <!-- Waveform Canvas -->
+              <div id="waveform-container" class="hidden mt-4">
+                <canvas id="waveform-canvas" class="w-full h-16 rounded-lg"></canvas>
+              </div>
             </div>
-            <p id="selected-file-name" class="text-white font-medium truncate"></p>
-            <p id="selected-file-size" class="text-sm text-gray-500"></p>
+
+            <!-- Recorded / Playback State -->
+            <div id="record-playback-state" class="hidden space-y-4">
+              <div class="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-400">
+                  <path d="M9 18V5l12-2v13"></path>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+              </div>
+              <p id="recording-duration" class="text-white font-medium">Recording — 0:00</p>
+
+              <!-- Audio Playback -->
+              <audio id="recording-playback" controls class="w-full [&::-webkit-media-controls-panel]:bg-[#1A1A1E] rounded-lg"></audio>
+
+              <!-- Re-record Button -->
+              <button id="re-record-btn" class="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                  <path d="M21 21v-5h-5"></path>
+                </svg>
+                Record Again
+              </button>
+            </div>
+
           </div>
         </div>
 
