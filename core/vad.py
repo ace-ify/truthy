@@ -12,7 +12,6 @@ from config import SAMPLE_RATE, MIN_SPEECH_PROB
 
 
 class VADProcessor:
-    """Voice Activity Detection using Silero VAD model."""
     
     # Silero VAD requires specific window sizes
     WINDOW_SIZE_SAMPLES = 512  # For 16kHz
@@ -22,8 +21,7 @@ class VADProcessor:
         self._load_model()
     
     def _load_model(self):
-        """Load Silero VAD model with fallback mechanism."""
-        print("2026-02-04 23:26:45,223 - api.main - INFO - Loading VAD model...")
+        print("Loading VAD model...")
         
         try:
             # Method 1: Standard Torch Hub load
@@ -35,9 +33,9 @@ class VADProcessor:
                 trust_repo=True
             )
             self.model = model
-            print("✅ VAD model loaded via Torch Hub.")
+            print("VAD model loaded via Torch Hub")
         except Exception as e:
-            print(f"⚠️ Torch Hub load failed: {e}. Attempting direct download fallback...")
+            print(f"Torch Hub load failed: {e}, trying direct download...")
             
             # Method 2: Direct JIT fallback
             try:
@@ -46,14 +44,14 @@ class VADProcessor:
                 model_path = Path("silero_vad.jit")
                 
                 if not model_path.exists():
-                    print(f"⬇️ Downloading VAD model from fallback URL: {url}")
+                    print(f"Downloading VAD model from {url}")
                     torch.hub.download_url_to_file(url, str(model_path))
                 
                 # Load as a scripted model
                 self.model = torch.jit.load(str(model_path))
-                print("✅ VAD model loaded via direct JIT fallback.")
+                print("VAD model loaded (JIT fallback)")
             except Exception as fe:
-                print(f"❌ VAD fallback also failed: {fe}")
+                print(f"VAD fallback also failed: {fe}")
                 raise fe
                 
         if self.model:
@@ -114,12 +112,10 @@ class VADProcessor:
     
     def has_speech(self, audio: np.ndarray, sr: int = SAMPLE_RATE, 
                    threshold: float = MIN_SPEECH_PROB) -> bool:
-        """Check if audio chunk contains speech above threshold."""
         prob = self.detect_speech_in_chunk(audio, sr)
         return prob > threshold
     
     def process_chunks(self, chunks: List[np.ndarray], sr: int = SAMPLE_RATE) -> List[Dict[str, Any]]:
-        """Process multiple audio chunks and return speech detection results."""
         results = []
         for i, chunk in enumerate(chunks):
             # Reset model between chunks for clean state
@@ -138,7 +134,6 @@ class VADProcessor:
 _vad_processor = None
 
 def get_vad_processor() -> VADProcessor:
-    """Get or create singleton VAD processor instance."""
     global _vad_processor
     if _vad_processor is None:
         _vad_processor = VADProcessor()

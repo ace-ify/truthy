@@ -12,7 +12,6 @@ from config import CHUNK_DURATION, AI_THRESHOLD
 
 @dataclass
 class ChunkResult:
-    """Result for a single audio chunk."""
     chunk_index: int
     start_time: float
     end_time: float
@@ -24,7 +23,6 @@ class ChunkResult:
 
 @dataclass
 class AnalysisResult:
-    """Complete analysis result for an audio file."""
     overall_ai_probability: float
     verdict: str
     confidence: str

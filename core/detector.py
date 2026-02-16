@@ -19,7 +19,6 @@ from config import SAMPLE_RATE, DEEPFAKE_MODEL_ID, AI_THRESHOLD
 
 
 class DeepfakeDetector:
-    """AI Voice Detection using HuggingFace Inference API or local model."""
     
     # HuggingFace Inference API endpoint
     HF_API_URL = f"https://api-inference.huggingface.co/models/{DEEPFAKE_MODEL_ID}"
@@ -38,29 +37,27 @@ class DeepfakeDetector:
     
     def _initialize(self):
         """Initialize detector - try API first, fall back to local."""
-        print(f"🔧 Initializing Deepfake Detector...")
-        print(f"   Model: {self.model_id}")
+        print(f"Initializing detector with {self.model_id}")
         
         # Check if HF token is available
         if self.hf_token:
-            print("🌐 HuggingFace API token found. Testing Inference API...")
+            print("HF token found, testing API...")
             if self._test_api():
                 self.use_api = True
-                print("✅ Using HuggingFace Inference API (cloud-based, no local memory needed)")
+                print("Using HuggingFace Inference API")
                 # Default label mapping for API mode
                 self.ai_index = 0
                 self.human_index = 1
                 return
             else:
-                print("⚠️ API test failed. Falling back to local model...")
+                print("API test failed, falling back to local model")
         else:
-            print("⚠️ No HF_TOKEN found. Attempting local model load...")
+            print("No HF_TOKEN set, loading model locally")
         
         # Fallback to local model (this imports torch)
         self._load_model_local()
     
     def _test_api(self) -> bool:
-        """Test if the HuggingFace Inference API is working."""
         try:
             headers = {"Authorization": f"Bearer {self.hf_token}"}
             # Send a minimal test request with timeout
@@ -86,13 +83,13 @@ class DeepfakeDetector:
         NOTE: This imports torch and transformers only when needed (lazy import).
         """
         # LAZY IMPORTS - only load heavy libraries if we need local mode
-        print("📦 Loading PyTorch and Transformers (local mode)...")
+        print("Loading PyTorch and Transformers...")
         import torch
         from transformers import AutoModelForAudioClassification, AutoFeatureExtractor
         import gc
         
         self.device = torch.device("cpu")
-        print(f"📦 Loading model locally: {self.model_id}...")
+        print(f"Loading model: {self.model_id}")
         print(f"   Using device: {self.device}")
         
         gc.collect()
@@ -107,7 +104,7 @@ class DeepfakeDetector:
             )
             
             # Load model with memory-efficient flags
-            print("📦 Compressing model weights (Dynamic Quantization)...")
+            print("Applying dynamic quantization...")
             self.model = AutoModelForAudioClassification.from_pretrained(
                 self.model_id,
                 low_cpu_mem_usage=True,
@@ -135,7 +132,7 @@ class DeepfakeDetector:
                     self.human_index = idx
                     
         except Exception as e:
-            print(f"❌ Error loading detector model: {e}")
+            print(f"Error loading detector model: {e}")
             raise e
             
         # Fallback label mapping
@@ -144,10 +141,9 @@ class DeepfakeDetector:
         if self.human_index is None:
             self.human_index = 1
             
-        print(f"✅ Local model loaded. Label mapping: AI={self.ai_index}, Human={self.human_index}")
+        print(f"Model loaded. Labels: AI={self.ai_index}, Human={self.human_index}")
     
     def _predict_api(self, audio: np.ndarray, sr: int) -> Tuple[float, str]:
-        """Predict using HuggingFace Inference API."""
         import soundfile as sf
         
         # Convert audio to WAV bytes
@@ -187,23 +183,22 @@ class DeepfakeDetector:
                     
                 elif response.status_code == 503:
                     # Model is loading, wait and retry
-                    print(f"   ⏳ Model loading on HF servers... (attempt {attempt + 1}/{max_retries})")
+                    print(f"   Model loading on HF servers (attempt {attempt + 1}/{max_retries})")
                     import time
                     time.sleep(20)  # Wait for model to load
                 else:
-                    print(f"   ❌ API error: {response.status_code} - {response.text[:200]}")
+                    print(f"   API error: {response.status_code} - {response.text[:200]}")
                     break
             except requests.exceptions.Timeout:
-                print(f"   ⏱️ Request timed out (attempt {attempt + 1}/{max_retries})")
+                print(f"   Timed out (attempt {attempt + 1}/{max_retries})")
                 continue
             except Exception as e:
-                print(f"   ❌ API exception: {e}")
+                print(f"   API exception: {e}")
                 break
         
         raise Exception(f"HuggingFace API failed after {max_retries} attempts")
     
     def _predict_local(self, audio: np.ndarray, sr: int) -> Tuple[float, str]:
-        """Predict using local model."""
         import torch
         
         inputs = self.feature_extractor(
@@ -245,7 +240,6 @@ class DeepfakeDetector:
             return self._predict_local(audio, sr)
     
     def get_model_labels(self) -> dict:
-        """Return the model's label mapping."""
         if self.model:
             return self.model.config.id2label
         return {0: "LABEL_0 (AI/Fake)", 1: "LABEL_1 (Human/Real)"}
@@ -255,7 +249,6 @@ class DeepfakeDetector:
 _detector = None
 
 def get_detector() -> DeepfakeDetector:
-    """Get or create singleton detector instance."""
     global _detector
     if _detector is None:
         _detector = DeepfakeDetector()

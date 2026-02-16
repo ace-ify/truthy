@@ -2,307 +2,141 @@
   <img src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=3b82f6&bg=000000&s=65" alt="Truthy Logo" height="60">
 </p>
 
-<h1 align="center">Truthy - AI Voice Detection</h1>
+# Truthy - AI Voice Detection
 
-<p align="center">
-  <strong>Detect AI-generated voices and deepfake audio in real-time</strong>
-</p>
+Detect AI-generated voices and deepfake audio. Built for a hackathon.
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#demo">Demo</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#api-reference">API Reference</a> •
-  <a href="#deployment">Deployment</a> •
-  <a href="#tech-stack">Tech Stack</a>
-</p>
+Uses WavLM + Silero VAD under the hood to classify audio as human or AI-generated, with per-chunk analysis and confidence scoring.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi" alt="FastAPI">
-  <img src="https://img.shields.io/badge/PyTorch-2.0+-red?style=flat-square&logo=pytorch" alt="PyTorch">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License">
-</p>
+## What it does
 
----
+- Takes in audio (file upload or Base64 via API)
+- Runs Voice Activity Detection to find speech segments
+- Classifies each segment using a fine-tuned WavLM model
+- Returns an overall verdict with confidence score
 
-## 🎯 Problem Statement
+Supports English, Hindi, Tamil, Telugu, Malayalam.
 
-With the rise of AI voice cloning and deepfake audio, detecting synthetic voices has become critical for:
-- **Financial Security**: Preventing voice-based fraud and scam calls
-- **Media Verification**: Authenticating audio content in journalism
-- **Identity Protection**: Safeguarding against voice spoofing attacks
+## Quick start
 
-**Truthy** solves this by providing a fast, accurate, and multilingual AI voice detection API.
+```bash
+git clone https://github.com/ace-ify/truthy.git
+cd truthy
 
----
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-## ✨ Features
+pip install -r requirements.txt
+python -m uvicorn api.main:app --reload --port 8000
+```
 
-- 🎙️ **Real-time Detection** - Analyze audio samples in under 5 seconds
-- 🌍 **Multilingual Support** - English, Hindi, Tamil, Telugu, Malayalam
-- 📊 **Confidence Scoring** - Get probability scores with explanations
-- 🔒 **Secure API** - API key authentication with rate limiting
-- 📱 **Modern UI** - Beautiful, responsive web interface
-- ⚡ **Fast Inference** - Optimized for CPU and GPU
+Then open `http://localhost:8000`.
 
----
+You'll need ~4GB RAM for model loading.
 
-## 🖥️ Demo
+## API
 
-### API Response Example
+All external API calls need an `x-api-key` header. Requests from the same origin (the website itself) skip auth.
+
+### `POST /api/voice-detection`
+
+Main endpoint. Accepts Base64-encoded audio.
+
+```json
+{
+  "language": "English",
+  "audioFormat": "mp3",
+  "audioBase64": "..."
+}
+```
+
+Response:
 ```json
 {
   "status": "success",
   "language": "English",
   "classification": "AI_GENERATED",
   "confidenceScore": 0.87,
-  "explanation": "Strong synthetic voice patterns detected. Audio shows clear signs of AI generation with unnatural pitch consistency."
+  "explanation": "Strong synthetic voice patterns detected..."
 }
 ```
 
----
+### `POST /api/analyze`
 
-## 🚀 Installation
+File upload endpoint (legacy, used for testing).
 
-### Prerequisites
-- Python 3.9+
-- pip
-- 4GB+ RAM (for model loading)
+### `GET /api/health`
 
-### Local Setup
+Returns model status and device info.
 
-```bash
-# Clone the repository
-git clone https://github.com/ace-ify/truthy.git
-cd truthy
+### `GET /api/info`
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+Lists supported languages and available endpoints.
 
-# Install dependencies
-pip install -r requirements.txt
+### Errors
 
-# Run the server
-python -m uvicorn api.main:app --reload --port 8000
-```
+All errors return `{"status": "error", "message": "..."}` with appropriate HTTP status codes (400, 401, 429, 500).
 
-Open `http://localhost:8000` in your browser.
-
----
-
-## 📚 API Reference
-
-### Authentication
-All API requests require an API key in the header:
-```
-x-api-key: your_api_key_here
-```
-
-### Endpoints
-
-#### `POST /api/voice-detection`
-Analyze Base64-encoded audio for AI voice detection.
-
-**Request Body:**
-```json
-{
-  "language": "English",
-  "audioFormat": "mp3",
-  "audioBase64": "base64_encoded_audio_string"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "language": "English",
-  "classification": "HUMAN | AI_GENERATED",
-  "confidenceScore": 0.95,
-  "explanation": "Audio exhibits natural human speech characteristics..."
-}
-```
-
-#### `GET /api/health`
-Check API health and model status.
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "models_loaded": true,
-  "device": "cuda"
-}
-```
-
-#### `GET /api/info`
-Get API information and supported languages.
-
-### Error Responses
-```json
-{
-  "status": "error",
-  "message": "Error description"
-}
-```
-
-| Status Code | Description |
-|-------------|-------------|
-| 400 | Bad Request - Invalid input |
-| 401 | Unauthorized - Invalid/missing API key |
-| 429 | Too Many Requests - Rate limit exceeded |
-| 500 | Internal Server Error |
-
----
-
-## 🛠️ Tech Stack
-
-### Backend
-| Technology | Purpose |
-|------------|---------|
-| **FastAPI** | High-performance API framework |
-| **PyTorch** | Deep learning inference |
-| **WavLM** | Pre-trained audio model for detection |
-| **Silero VAD** | Voice Activity Detection |
-| **librosa** | Audio processing |
-
-### Frontend
-| Technology | Purpose |
-|------------|---------|
-| **HTML5/CSS3** | Structure and styling |
-| **TailwindCSS** | Utility-first CSS |
-| **JavaScript** | Client-side logic |
-| **Lucide Icons** | Icon library |
-
-### Infrastructure
-| Service | Purpose |
-|---------|---------|
-| **Render** | Cloud deployment |
-| **Hugging Face** | Model hosting |
-| **GitHub** | Version control |
-
----
-
-## 📁 Project Structure
+## Project structure
 
 ```
 truthy/
 ├── api/
-│   ├── main.py          # FastAPI application
-│   └── models.py        # Pydantic schemas
+│   ├── main.py            # FastAPI app, routes, auth
+│   └── models.py          # Pydantic request/response schemas
 ├── core/
-│   ├── detector.py      # Deepfake detection model
-│   ├── vad.py           # Voice Activity Detection
-│   ├── audio_processor.py  # Audio preprocessing
-│   └── aggregator.py    # Result aggregation
-├── static/
-│   ├── index.html       # Frontend UI
-│   ├── css/style.css    # Custom styles
-│   └── js/script.js     # Client-side JS
-├── config.py            # Configuration settings
-├── requirements.txt     # Python dependencies
-├── Procfile             # Deployment config
-└── README.md            # This file
+│   ├── detector.py        # WavLM deepfake classifier (HF API + local fallback)
+│   ├── vad.py             # Silero VAD wrapper
+│   ├── audio_processor.py # Loading, resampling, noise reduction
+│   └── aggregator.py      # Combines chunk results into final verdict
+├── static/                # Frontend (HTML/CSS/JS)
+├── config.py              # Settings and thresholds
+├── requirements.txt
+├── Dockerfile
+└── Procfile
 ```
 
----
+## Tech stack
 
-## 🌐 Deployment
+**Backend:** FastAPI, PyTorch, WavLM, Silero VAD, librosa, noisereduce
 
-### Deploy to Render
+**Frontend:** HTML/CSS/JS, TailwindCSS, Lucide Icons
 
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
+**Infra:** Render (deployment), HuggingFace (model hosting)
 
-2. **Create Render Web Service**
-   - Go to [render.com](https://render.com)
-   - New → Web Service
-   - Connect your GitHub repo
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
+## Deployment
 
-3. **Set Environment Variables**
-   | Variable | Value |
-   |----------|-------|
-   | `API_KEYS` | `demo_key_12345` |
-   | `PYTHONUNBUFFERED` | `1` |
+Deployed on Render. Set these env vars:
 
-4. **Deploy** - Click "Create Web Service"
+| Variable | Value |
+|----------|-------|
+| `API_KEYS` | comma-separated API keys |
+| `PYTHONUNBUFFERED` | `1` |
+| `HF_TOKEN` | your HuggingFace token (optional, enables cloud inference) |
 
-### Live URL
-Your API will be available at: `https://your-app.onrender.com`
+Start command: `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
 
----
+## How detection works
 
-## 🔐 Security
+Audio gets split into 6-second chunks. Each chunk goes through:
 
-- ✅ API Key authentication
-- ✅ Rate limiting (100 requests/minute)
-- ✅ HTTPS encryption (via Render)
-- ✅ Input validation
-- ✅ Error handling without sensitive data
+1. **VAD** — Silero checks if there's actual speech in the chunk
+2. **Classification** — Speech chunks get scored by a WavLM-based model (fine-tuned for deepfake detection)
+3. **Aggregation** — Chunk scores are combined using a max-weighted average. If any chunk has a strong AI signal (>70%), it pulls the overall score up.
 
----
+Threshold is 0.5 — above that it's flagged as AI.
 
-## 📊 Performance
+## Roadmap
 
-| Metric | Value |
-|--------|-------|
-| Average Response Time | < 3 seconds |
-| Model Accuracy | ~95% |
-| Supported Audio Length | Up to 5 minutes |
-| Max File Size | 50 MB |
+- More Indian languages (Kannada, Bengali, Gujarati)
+- Real-time streaming detection
+- Browser extension
+- Mobile SDK
+
+## License
+
+MIT
 
 ---
 
-## 🗺️ Roadmap
-
-- [ ] Add more Indian languages (Kannada, Bengali, Gujarati)
-- [ ] Real-time streaming detection
-- [ ] Browser extension for audio verification
-- [ ] Mobile SDK (iOS/Android)
-- [ ] Enhanced API analytics dashboard
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👥 Team
-
-Built with ❤️ for hackathon by the Truthy Team
-
----
-
-## 📞 Support
-
-- 📧 Email: 21naimish21@gmail.com
-- 📖 Documentation: `/docs` endpoint (FastAPI auto-generated)
-- 🐛 Issues: [GitHub Issues](https://github.com/ace-ify/truthy/issues)
-
----
-
-<p align="center">
-  <strong>Truthy</strong> - Detect. Verify. Trust.
-</p>
+Built for hackathon by the Truthy team.

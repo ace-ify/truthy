@@ -115,7 +115,6 @@ models_initialized = False
 
 
 def init_models():
-    """Initialize models on startup."""
     global vad_processor, detector, models_initialized
     if not models_initialized:
         logger.info("Loading VAD model...")
@@ -132,12 +131,10 @@ def init_models():
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize models on server startup."""
     init_models()
 
 
 def get_models():
-    """Get model instances, initializing if needed."""
     global vad_processor, detector
     if not models_initialized:
         init_models()
@@ -177,7 +174,6 @@ def verify_api_key(
 
 
 def generate_explanation(ai_prob: float, classification: str, language: str) -> str:
-    """Generate a human-readable explanation for the detection result."""
     if classification == "AI_GENERATED":
         if ai_prob > 0.9:
             return f"Strong synthetic voice patterns detected. Audio shows clear signs of AI generation with unnatural pitch consistency and robotic speech artifacts in {language}."
@@ -196,13 +192,11 @@ def generate_explanation(ai_prob: float, classification: str, language: str) -> 
 
 @app.get("/")
 async def root():
-    """Serve the main frontend page."""
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
-    """Check if models are loaded and API is ready."""
     try:
         vad, det = get_models()
         return HealthResponse(
@@ -431,7 +425,6 @@ async def voice_detection(
 
 @app.get("/api/info")
 async def api_info():
-    """API information endpoint."""
     return {
         "name": "Truthy AI Voice Detector API",
         "version": "1.0.0",
