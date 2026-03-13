@@ -6,10 +6,11 @@ import base64
 import tempfile
 import logging
 from pathlib import Path
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -20,12 +21,13 @@ import torch
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from config import SAMPLE_RATE, CHUNK_DURATION, UPLOAD_DIR
+from config import SAMPLE_RATE, CHUNK_DURATION, UPLOAD_DIR, PREWARM_IMAGE_MODELS
 from core.audio_processor import process_uploaded_file, split_into_chunks
 from core.aggregator import aggregate_results
 from api.models import (
     AnalysisResponse, ErrorResponse, HealthResponse,
-    VoiceDetectionRequest, VoiceDetectionResponse, VoiceDetectionErrorResponse
+    VoiceDetectionRequest, VoiceDetectionResponse, VoiceDetectionErrorResponse,
+    ImageDetectionRequest, ImageDetectionResponse, SignalBreakdown,
 )
 
 # Configure logging
@@ -47,11 +49,20 @@ API_KEYS = set(
 # Rate limiter configuration
 limiter = Limiter(key_func=get_remote_address)
 
+
+@asynccontextmanager
+async def lifespan(app):
+    """Load all models on startup."""
+    init_models()
+    yield
+
+
 # Create FastAPI app
 app = FastAPI(
-    title="AI Voice Detector API",
-    description="Detect AI-generated voices vs human voices using deep learning",
-    version="1.0.0"
+    title="Truthy AI Detection API",
+    description="Detect AI-generated voices and images using deep learning ensemble",
+    version="2.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -111,27 +122,42 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 # Model instances - will be initialized on startup
 vad_processor = None
 detector = None
+image_pipeline = None
 models_initialized = False
 
 
 def init_models():
-    global vad_processor, detector, models_initialized
+    global vad_processor, detector, image_pipeline, models_initialized
     if not models_initialized:
         logger.info("Loading VAD model...")
         from core.vad import VADProcessor
         vad_processor = VADProcessor()
-        
+
         logger.info("Loading deepfake detector model...")
         from core.detector import DeepfakeDetector
         detector = DeepfakeDetector()
-        
+
+        logger.info("Loading image detection pipeline...")
+        from core.image.pipeline import ImageDetectionPipeline
+        image_pipeline = ImageDetectionPipeline()
+
+        # Pre-warm image ML models so first request isn't slow
+        if PREWARM_IMAGE_MODELS:
+            logger.info("Pre-warming image ML models (CNN + CLIP)...")
+            for analyzer in image_pipeline.analyzers:
+                if hasattr(analyzer, '_load_local_model') and analyzer.model is None:
+                    try:
+                        analyzer._load_local_model()
+                        logger.info(f"  Pre-warmed: {analyzer.name}")
+                    except Exception as e:
+                        logger.warning(f"  Failed to pre-warm {analyzer.name}: {e}")
+
         models_initialized = True
         logger.info("All models loaded!")
 
 
-@app.on_event("startup")
-async def startup_event():
-    init_models()
+
+
 
 
 def get_models():
@@ -195,6 +221,19 @@ async def root():
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = STATIC_DIR / "favicon.ico"
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path))
+    return Response(status_code=204)
+
+
+@app.get("/image")
+async def image_page():
+    return FileResponse(str(STATIC_DIR / "image.html"))
+
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     try:
@@ -202,7 +241,7 @@ async def health_check():
         return HealthResponse(
             status="healthy",
             models_loaded=True,
-            device=str(det.device)
+            device=str(det.device) if det.device else "api"
         )
     except Exception as e:
         return HealthResponse(
@@ -426,17 +465,264 @@ async def voice_detection(
 @app.get("/api/info")
 async def api_info():
     return {
-        "name": "Truthy AI Voice Detector API",
-        "version": "1.0.0",
+        "name": "Truthy AI Detection API",
+        "version": "2.0.0",
         "supported_languages": ["Tamil", "English", "Hindi", "Malayalam", "Telugu"],
         "endpoints": {
             "POST /api/voice-detection": "Analyze Base64 audio (requires API key)",
             "POST /api/analyze": "Analyze uploaded audio file (legacy)",
+            "POST /api/image-detection": "Detect AI-generated images (Base64, requires API key)",
+            "POST /api/image-analyze": "Detect AI-generated images (file upload)",
             "GET /api/health": "Check API health and model status"
         }
     }
 
 
+# ============================================================================
+# Image Detection API
+# ============================================================================
+
+@limiter.limit("60/minute")
+@app.post("/api/image-detection", response_model=ImageDetectionResponse)
+async def image_detection(
+    request: ImageDetectionRequest,
+    api_key: str = Depends(verify_api_key),
+):
+    """
+    Detect whether an image is AI-generated or human-created.
+
+    Uses a multi-signal forensic ensemble: frequency analysis, error level analysis,
+    noise patterns, CNN classifier, and more — aggregated by a weighted judge.
+
+    Modes:
+    - quick: ~2s, top 3 fastest analyzers
+    - standard: ~10s, all analyzers
+    - thorough: ~25s, all analyzers + LLM reasoning
+    """
+    try:
+        # Validate base64
+        try:
+            import base64 as b64module
+            image_bytes = b64module.b64decode(request.imageBase64)
+        except Exception:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": "Invalid Base64 encoding for image data"}
+            )
+
+        if len(image_bytes) < 100:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": "Image data too small or corrupt"}
+            )
+
+        max_bytes = 20 * 1024 * 1024  # 20MB
+        if len(image_bytes) > max_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": f"Image too large. Max {max_bytes // (1024*1024)}MB"}
+            )
+
+        # Run pipeline
+        global image_pipeline
+        if image_pipeline is None:
+            from core.image.pipeline import get_pipeline
+            image_pipeline = get_pipeline()
+
+        verdict = image_pipeline.analyze_from_base64(
+            request.imageBase64,
+            image_format=request.imageFormat,
+            mode=request.mode,
+        )
+
+        # Map verdict to classification enum
+        if verdict.verdict == "AI Generated":
+            classification = "AI_GENERATED"
+        elif verdict.verdict == "Human Created":
+            classification = "HUMAN"
+        else:
+            classification = "INCONCLUSIVE"
+
+        confidence_score = round(
+            verdict.overall_ai_probability if classification == "AI_GENERATED"
+            else 1 - verdict.overall_ai_probability if classification == "HUMAN"
+            else 0.5,
+            2,
+        )
+
+        return ImageDetectionResponse(
+            status="success",
+            classification=classification,
+            confidenceScore=confidence_score,
+            confidence=verdict.confidence,
+            explanation=verdict.explanation,
+            generatorGuess=verdict.generator_guess,
+            signalBreakdown=[
+                SignalBreakdown(**s) for s in verdict.signal_breakdown
+            ],
+            heatmapBase64=verdict.heatmap_b64,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error processing image: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "error", "message": f"Error processing image: {str(e)}"}
+        )
+
+
+@app.post("/api/image-analyze", response_model=ImageDetectionResponse)
+async def image_analyze(
+    file: UploadFile = File(...),
+    mode: str = "standard",
+):
+    """
+    Analyze an uploaded image file for AI generation detection.
+    File upload version (no API key needed for same-origin).
+    """
+    allowed_extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif"}
+    file_ext = Path(file.filename).suffix.lower()
+
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": f"Unsupported format: {file_ext}. Allowed: {allowed_extensions}"}
+        )
+
+    temp_path = None
+    try:
+        content = await file.read()
+
+        max_bytes = 20 * 1024 * 1024
+        if len(content) > max_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": f"Image too large. Max {max_bytes // (1024*1024)}MB"}
+            )
+
+        # Save temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+            temp_file.write(content)
+            temp_path = temp_file.name
+
+        # Run pipeline
+        global image_pipeline
+        if image_pipeline is None:
+            from core.image.pipeline import get_pipeline
+            image_pipeline = get_pipeline()
+
+        verdict = image_pipeline.analyze_from_path(temp_path, mode=mode)
+
+        if verdict.verdict == "AI Generated":
+            classification = "AI_GENERATED"
+        elif verdict.verdict == "Human Created":
+            classification = "HUMAN"
+        else:
+            classification = "INCONCLUSIVE"
+
+        confidence_score = round(
+            verdict.overall_ai_probability if classification == "AI_GENERATED"
+            else 1 - verdict.overall_ai_probability if classification == "HUMAN"
+            else 0.5,
+            2,
+        )
+
+        return ImageDetectionResponse(
+            status="success",
+            classification=classification,
+            confidenceScore=confidence_score,
+            confidence=verdict.confidence,
+            explanation=verdict.explanation,
+            generatorGuess=verdict.generator_guess,
+            signalBreakdown=[
+                SignalBreakdown(**s) for s in verdict.signal_breakdown
+            ],
+            heatmapBase64=verdict.heatmap_b64,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error processing image: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "error", "message": f"Error processing image: {str(e)}"}
+        )
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
+# ============================================================================
+# SSE Streaming Endpoint
+# ============================================================================
+
+@app.post("/api/image-stream")
+async def image_stream(
+    file: UploadFile = File(...),
+    mode: str = "standard",
+):
+    """
+    Stream image analysis results as Server-Sent Events.
+    Each analyzer result is sent as it completes, followed by the final verdict.
+    """
+    from fastapi.responses import StreamingResponse
+    from core.image.preprocessor import load_image_from_path as _load_path
+
+    allowed_extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif"}
+    file_ext = Path(file.filename).suffix.lower()
+
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": f"Unsupported format: {file_ext}"}
+        )
+
+    content = await file.read()
+    if len(content) > 20 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": "Image too large. Max 20MB"}
+        )
+
+    # Save to temp file
+    temp_path = None
+    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+        temp_file.write(content)
+        temp_path = temp_file.name
+
+    def event_generator():
+        try:
+            global image_pipeline
+            if image_pipeline is None:
+                from core.image.pipeline import get_pipeline
+                image_pipeline = get_pipeline()
+
+            image_data = _load_path(temp_path)
+            for event_data in image_pipeline.stream_analysis(image_data, mode=mode):
+                yield f"data: {event_data}\n\n"
+            yield "data: {\"type\": \"done\"}\n\n"
+        except Exception as e:
+            import json
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from config import API_HOST, API_PORT
+    uvicorn.run(app, host=API_HOST, port=API_PORT)

@@ -21,7 +21,7 @@ from config import SAMPLE_RATE, DEEPFAKE_MODEL_ID, AI_THRESHOLD
 class DeepfakeDetector:
     
     # HuggingFace Inference API endpoint
-    HF_API_URL = f"https://api-inference.huggingface.co/models/{DEEPFAKE_MODEL_ID}"
+    HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{DEEPFAKE_MODEL_ID}"
     
     def __init__(self, model_id: str = DEEPFAKE_MODEL_ID):
         self.model_id = model_id
@@ -49,8 +49,6 @@ class DeepfakeDetector:
                 self.ai_index = 0
                 self.human_index = 1
                 return
-            else:
-                print("API test failed, falling back to local model")
         else:
             print("No HF_TOKEN set, loading model locally")
         
@@ -68,10 +66,13 @@ class DeepfakeDetector:
                 timeout=15
             )
             print(f"   API test response: {response.status_code}")
-            # API returns 200 or 503 (model loading) - both are acceptable
-            if response.status_code in [200, 503]:
+            # 200 = ready, 503 = model loading, 500 = endpoint exists but bad input (expected for audio model with text)
+            if response.status_code in [200, 500, 503]:
                 return True
-            print(f"   Unexpected API status: {response.status_code} - {response.text[:200]}")
+            if response.status_code == 404:
+                print("   Model not available on HF Inference API, using local model")
+            else:
+                print(f"   Unexpected API status: {response.status_code} - {response.text[:200]}")
             return False
         except Exception as e:
             print(f"   API test error: {e}")

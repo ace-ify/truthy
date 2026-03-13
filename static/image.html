@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truthy - AI Image Detection</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    @keyframes fadeInUp { 0% { opacity:0; transform:translateY(20px); } 100% { opacity:1; transform:translateY(0); } }
+    @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 40px rgba(59,130,246,0.5); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes progressBar { 0% { width: 0; } 100% { width: var(--target); } }
+    @keyframes slideIn { 0% { opacity:0; transform:translateX(-10px); } 100% { opacity:1; transform:translateX(0); } }
+    .animate-fade-in { animation: fadeInUp 0.5s ease-out both; }
+    .animate-slide-in { animation: slideIn 0.4s ease-out both; }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .drop-active { border-color: #3b82f6 !important; background: rgba(59,130,246,0.05) !important; }
+    .signal-bar { animation: progressBar 0.8s ease-out both; }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body class="antialiased bg-[#000000] text-white min-h-screen">
+
+  <!-- Subtle background gradient -->
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[300px] bg-purple-500/5 rounded-full blur-[100px]"></div>
+  </div>
+
+  <!-- Main container -->
+  <div class="relative z-10 max-w-4xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <header class="text-center mb-10 animate-fade-in">
+      <a href="/" class="inline-block mb-6 text-sm text-gray-500 hover:text-gray-300 transition-colors">&larr; Back to Home</a>
+      <h1 class="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
+        AI Image Detection
+      </h1>
+      <p class="text-gray-400 text-lg max-w-xl mx-auto">
+        Multi-signal forensic analysis to detect AI-generated images with high accuracy
+      </p>
+    </header>
+
+    <!-- Upload Card -->
+    <div id="upload-card" class="glass rounded-3xl p-8 mb-8 animate-fade-in" style="animation-delay: 0.1s">
+
+      <!-- Mode selector -->
+      <div class="flex gap-2 mb-6 bg-white/5 rounded-xl p-1">
+        <button data-mode="quick" class="mode-btn flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+          Quick <span class="text-xs text-gray-600 ml-1">~3s</span>
+        </button>
+        <button data-mode="standard" class="mode-btn flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 bg-white/10 text-white">
+          Standard <span class="text-xs text-gray-500 ml-1">~5s</span>
+        </button>
+        <button data-mode="thorough" class="mode-btn flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+          Thorough <span class="text-xs text-gray-600 ml-1">~15s</span>
+        </button>
+      </div>
+
+      <!-- Drop zone -->
+      <div id="drop-zone" class="relative border-2 border-dashed border-white/15 hover:border-blue-500/50 rounded-2xl p-10 text-center cursor-pointer transition-all duration-300">
+        <input type="file" id="image-file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.bmp" class="hidden">
+
+        <!-- Default state -->
+        <div id="drop-default" class="space-y-4">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-white/5 flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="9" cy="9" r="2"></circle>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-gray-300 font-medium text-lg">Drop your image here</p>
+            <p class="text-sm text-gray-500 mt-1">or click to browse</p>
+          </div>
+          <p class="text-xs text-gray-600">Supports JPG, PNG, WebP, BMP (max 20MB)</p>
+        </div>
+
+        <!-- Preview state -->
+        <div id="drop-preview" class="hidden">
+          <img id="preview-img" class="max-h-48 mx-auto rounded-xl object-contain mb-3" alt="Preview">
+          <p id="preview-name" class="text-white font-medium truncate"></p>
+          <p id="preview-size" class="text-sm text-gray-500"></p>
+          <button id="clear-btn" class="mt-2 text-sm text-gray-400 hover:text-red-400 transition-colors">Change image</button>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <p id="upload-error" class="hidden mt-3 text-sm text-red-400 text-center"></p>
+
+      <!-- Analyze button -->
+      <button id="analyze-btn" disabled
+        class="w-full mt-6 py-4 px-8 rounded-2xl text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <span id="analyze-text">Analyze Image</span>
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-section" class="hidden glass rounded-3xl p-8 mb-8 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin"></div>
+      <h3 class="text-xl font-semibold mb-2">Analyzing Image</h3>
+      <p id="loading-status" class="text-gray-400">Running forensic analyzers...</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-2" id="analyzer-chips"></div>
+    </div>
+
+    <!-- Results section -->
+    <div id="results-section" class="hidden space-y-6">
+
+      <!-- Verdict card -->
+      <div id="verdict-card" class="glass rounded-3xl p-8 animate-fade-in">
+        <div class="flex items-start justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <div id="verdict-icon" class="w-14 h-14 rounded-2xl flex items-center justify-center"></div>
+            <div>
+              <h2 id="verdict-label" class="text-2xl font-bold"></h2>
+              <p id="verdict-confidence" class="text-sm text-gray-400 mt-0.5"></p>
+            </div>
+          </div>
+          <div id="verdict-badge" class="px-4 py-2 rounded-full text-sm font-semibold"></div>
+        </div>
+
+        <!-- AI Probability gauge -->
+        <div class="mb-6">
+          <div class="flex justify-between text-sm text-gray-400 mb-2">
+            <span>Human</span>
+            <span id="probability-text" class="text-white font-semibold"></span>
+            <span>AI</span>
+          </div>
+          <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+            <div id="probability-bar" class="h-full rounded-full transition-all duration-1000 ease-out"></div>
+          </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="bg-white/3 rounded-xl p-4">
+          <p id="verdict-explanation" class="text-gray-300 text-sm leading-relaxed"></p>
+        </div>
+
+        <!-- Generator guess -->
+        <div id="generator-section" class="hidden mt-4 bg-purple-500/5 border border-purple-500/20 rounded-xl p-3 flex items-center gap-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-400 flex-shrink-0">
+            <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
+          </svg>
+          <span id="generator-text" class="text-sm text-purple-300"></span>
+        </div>
+      </div>
+
+      <!-- Forensic Heatmap -->
+      <div id="heatmap-section" class="hidden glass rounded-3xl p-8 animate-fade-in" style="animation-delay: 0.1s">
+        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/>
+          </svg>
+          Forensic Heatmap
+        </h3>
+        <p class="text-xs text-gray-500 mb-3">Pixel-level manipulation probability. Red = high anomaly, Blue = normal.</p>
+        <div class="flex justify-center">
+          <img id="heatmap-img" class="max-w-full max-h-64 rounded-xl border border-white/10" alt="Forensic Heatmap">
+        </div>
+      </div>
+
+      <!-- Signal breakdown -->
+      <div class="glass rounded-3xl p-8 animate-fade-in" style="animation-delay: 0.15s">
+        <h3 class="text-lg font-semibold mb-5 flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
+            <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+          </svg>
+          Signal Breakdown
+        </h3>
+        <div id="signals-list" class="space-y-4"></div>
+      </div>
+
+      <!-- Analyze another -->
+      <div class="text-center animate-fade-in" style="animation-delay: 0.3s">
+        <button id="reset-btn" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-sm font-medium text-gray-300 hover:text-white">
+          Analyze Another Image
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // Image Detection API Client
+    // =========================================================================
+    const ImageAPI = {
+      baseUrl: window.location.origin,
+
+      async analyzeFile(file, mode) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mode', mode);
+
+        const response = await fetch(`${this.baseUrl}/api/image-analyze?mode=${mode}`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail?.message || data.message || 'Analysis failed');
+        }
+        return data;
+      }
+    };
+
+    // =========================================================================
+    // State
+    // =========================================================================
+    let selectedFile = null;
+    let selectedMode = 'standard';
+
+    // =========================================================================
+    // DOM Elements
+    // =========================================================================
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('image-file-input');
+    const dropDefault = document.getElementById('drop-default');
+    const dropPreview = document.getElementById('drop-preview');
+    const previewImg = document.getElementById('preview-img');
+    const previewName = document.getElementById('preview-name');
+    const previewSize = document.getElementById('preview-size');
+    const clearBtn = document.getElementById('clear-btn');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const analyzeText = document.getElementById('analyze-text');
+    const uploadError = document.getElementById('upload-error');
+    const uploadCard = document.getElementById('upload-card');
+    const loadingSection = document.getElementById('loading-section');
+    const resultsSection = document.getElementById('results-section');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // =========================================================================
+    // Mode selection
+    // =========================================================================
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => {
+          b.classList.remove('bg-white/10', 'text-white');
+          b.classList.add('text-gray-400');
+        });
+        btn.classList.add('bg-white/10', 'text-white');
+        btn.classList.remove('text-gray-400');
+        selectedMode = btn.dataset.mode;
+      });
+    });
+
+    // =========================================================================
+    // Drag and drop
+    // =========================================================================
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.classList.add('drop-active'));
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.classList.remove('drop-active'));
+    });
+    dropZone.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+    clearBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      resetUpload();
+    });
+
+    // =========================================================================
+    // File handling
+    // =========================================================================
+    function handleFile(file) {
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif'];
+      const ext = file.name.toLowerCase().split('.').pop();
+      const validExts = ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'];
+
+      if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
+        showError('Please select a valid image file (JPG, PNG, WebP, BMP)');
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        showError('File size must be less than 20MB');
+        return;
+      }
+
+      selectedFile = file;
+      hideError();
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewName.textContent = file.name;
+        previewSize.textContent = formatSize(file.size);
+        dropDefault.classList.add('hidden');
+        dropPreview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+      analyzeBtn.disabled = false;
+    }
+
+    function resetUpload() {
+      selectedFile = null;
+      fileInput.value = '';
+      dropDefault.classList.remove('hidden');
+      dropPreview.classList.add('hidden');
+      analyzeBtn.disabled = true;
+      hideError();
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showError(msg) {
+      uploadError.textContent = msg;
+      uploadError.classList.remove('hidden');
+    }
+    function hideError() {
+      uploadError.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // Analysis — uses SSE streaming for live results
+    // =========================================================================
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      // Show loading
+      uploadCard.classList.add('hidden');
+      resultsSection.classList.add('hidden');
+      loadingSection.classList.remove('hidden');
+
+      const chips = document.getElementById('analyzer-chips');
+      chips.innerHTML = '';
+      const loadingStatus = document.getElementById('loading-status');
+      loadingStatus.textContent = 'Starting forensic analysis...';
+
+      const streamResults = [];
+
+      try {
+        // Use SSE streaming endpoint
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const response = await fetch(`${ImageAPI.baseUrl}/api/image-stream?mode=${selectedMode}`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail?.message || err.message || 'Analysis failed');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr) continue;
+
+            try {
+              const event = JSON.parse(jsonStr);
+
+              if (event.type === 'start') {
+                loadingStatus.textContent = `Running ${event.total_analyzers} analyzers...`;
+              }
+              else if (event.type === 'analyzer_result') {
+                // Add a chip for this analyzer
+                const chip = document.createElement('span');
+                const isHigh = event.score > 0.5;
+                const chipColor = event.error
+                  ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                  : isHigh
+                    ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                    : 'bg-green-500/10 text-green-400 border-green-500/20';
+                chip.className = `px-3 py-1 rounded-full text-xs font-medium border animate-fade-in ${chipColor}`;
+                chip.textContent = `${event.display_name} ${Math.round(event.score * 100)}%`;
+                chips.appendChild(chip);
+
+                loadingStatus.textContent = `${event.completed}/${event.total} analyzers complete...`;
+
+                streamResults.push({
+                  analyzer: event.analyzer,
+                  display_name: event.display_name,
+                  score: event.score,
+                  confidence: event.confidence,
+                  weight: event.weight,
+                  reasoning: event.reasoning,
+                  processing_time_ms: event.processing_time_ms,
+                  error: event.error || null,
+                });
+              }
+              else if (event.type === 'verdict') {
+                // Build a full result object and show it
+                const classification = event.verdict === 'AI Generated' ? 'AI_GENERATED'
+                  : event.verdict === 'Human Created' ? 'HUMAN' : 'INCONCLUSIVE';
+                const confidenceScore = classification === 'AI_GENERATED' ? event.overall_ai_probability
+                  : classification === 'HUMAN' ? (1 - event.overall_ai_probability) : 0.5;
+
+                showResults({
+                  classification,
+                  confidenceScore: Math.round(confidenceScore * 100) / 100,
+                  confidence: event.confidence,
+                  explanation: event.explanation,
+                  generatorGuess: event.generator_guess,
+                  heatmapBase64: event.heatmap_b64,
+                  signalBreakdown: streamResults,
+                });
+              }
+              else if (event.type === 'error') {
+                throw new Error(event.message);
+              }
+            } catch (parseErr) {
+              if (parseErr.message !== 'Unexpected end of JSON input') {
+                console.warn('SSE parse error:', parseErr);
+              }
+            }
+          }
+        }
+
+        // If we never got a verdict (fallback), use non-streaming
+        if (resultsSection.classList.contains('hidden')) {
+          const result = await ImageAPI.analyzeFile(selectedFile, selectedMode);
+          showResults(result);
+        }
+
+      } catch (error) {
+        uploadCard.classList.remove('hidden');
+        loadingSection.classList.add('hidden');
+        showError(error.message || 'Analysis failed. Please try again.');
+      }
+    });
+
+    // =========================================================================
+    // Results display
+    // =========================================================================
+    function showResults(result) {
+      loadingSection.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
+
+      const isAI = result.classification === 'AI_GENERATED';
+      const isHuman = result.classification === 'HUMAN';
+      const prob = Math.round(result.confidenceScore * 100);
+
+      // Verdict icon
+      const iconEl = document.getElementById('verdict-icon');
+      if (isAI) {
+        iconEl.className = 'w-14 h-14 rounded-2xl flex items-center justify-center bg-red-500/10';
+        iconEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-400"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+      } else if (isHuman) {
+        iconEl.className = 'w-14 h-14 rounded-2xl flex items-center justify-center bg-green-500/10';
+        iconEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+      } else {
+        iconEl.className = 'w-14 h-14 rounded-2xl flex items-center justify-center bg-yellow-500/10';
+        iconEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-400"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      }
+
+      // Verdict label
+      document.getElementById('verdict-label').textContent =
+        isAI ? 'AI Generated' : isHuman ? 'Human Created' : 'Inconclusive';
+      document.getElementById('verdict-label').className =
+        `text-2xl font-bold ${isAI ? 'text-red-400' : isHuman ? 'text-green-400' : 'text-yellow-400'}`;
+
+      // Confidence
+      document.getElementById('verdict-confidence').textContent =
+        `${result.confidence} confidence`;
+
+      // Badge
+      const badge = document.getElementById('verdict-badge');
+      badge.textContent = `${prob}%`;
+      badge.className = `px-4 py-2 rounded-full text-sm font-semibold ${
+        isAI ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+        : isHuman ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+        : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+      }`;
+
+      // Probability bar
+      const barPct = isAI ? prob : isHuman ? (100 - prob) : 50;
+      const bar = document.getElementById('probability-bar');
+      bar.style.width = '0%';
+      requestAnimationFrame(() => {
+        bar.style.width = barPct + '%';
+      });
+      bar.className = `h-full rounded-full transition-all duration-1000 ease-out ${
+        barPct > 65 ? 'bg-gradient-to-r from-orange-500 to-red-500'
+        : barPct > 35 ? 'bg-gradient-to-r from-yellow-500 to-orange-400'
+        : 'bg-gradient-to-r from-green-500 to-emerald-400'
+      }`;
+      document.getElementById('probability-text').textContent = barPct + '% AI probability';
+
+      // Explanation
+      document.getElementById('verdict-explanation').textContent = result.explanation;
+
+      // Generator guess
+      const genSection = document.getElementById('generator-section');
+      if (result.generatorGuess) {
+        genSection.classList.remove('hidden');
+        document.getElementById('generator-text').textContent = result.generatorGuess;
+      } else {
+        genSection.classList.add('hidden');
+      }
+
+      // Signal breakdown
+      // Heatmap
+      const heatmapSection = document.getElementById('heatmap-section');
+      if (result.heatmapBase64) {
+        heatmapSection.classList.remove('hidden');
+        document.getElementById('heatmap-img').src = 'data:image/png;base64,' + result.heatmapBase64;
+      } else {
+        heatmapSection.classList.add('hidden');
+      }
+
+      // Signal breakdown
+      renderSignals(result.signalBreakdown || []);
+    }
+
+    function renderSignals(signals) {
+      const list = document.getElementById('signals-list');
+      list.innerHTML = '';
+
+      // Sort by score descending
+      const sorted = [...signals].sort((a, b) => b.score - a.score);
+
+      sorted.forEach((s, i) => {
+        const pct = Math.round(s.score * 100);
+        const confPct = Math.round(s.confidence * 100);
+        const isHigh = s.score > 0.5;
+        const isMed = s.score > 0.3;
+
+        const barColor = isHigh ? 'from-orange-500 to-red-500'
+          : isMed ? 'from-yellow-500 to-orange-400'
+          : 'from-green-500 to-emerald-400';
+
+        const textColor = isHigh ? 'text-red-400' : isMed ? 'text-yellow-400' : 'text-green-400';
+
+        const div = document.createElement('div');
+        div.className = 'animate-slide-in';
+        div.style.animationDelay = (i * 80) + 'ms';
+        div.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-200">${s.display_name}</span>
+              ${s.error ? '<span class="text-xs text-red-400/70">(failed)</span>' : ''}
+            </div>
+            <span class="text-sm font-semibold ${textColor}">${pct}%</span>
+          </div>
+          <div class="h-2 bg-white/5 rounded-full overflow-hidden mb-1.5">
+            <div class="h-full rounded-full bg-gradient-to-r ${barColor} signal-bar" style="--target: ${pct}%"></div>
+          </div>
+          <div class="flex items-start justify-between">
+            <p class="text-xs text-gray-500 max-w-[80%]">${s.reasoning}</p>
+            <span class="text-xs text-gray-600">${confPct}% conf</span>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // =========================================================================
+    // Reset
+    // =========================================================================
+    resetBtn.addEventListener('click', () => {
+      resultsSection.classList.add('hidden');
+      uploadCard.classList.remove('hidden');
+      resetUpload();
+    });
+  </script>
+</body>
+</html>

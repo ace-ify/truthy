@@ -76,3 +76,46 @@ class VoiceDetectionErrorResponse(BaseModel):
     """Error response model for voice detection API."""
     status: Literal["error"] = "error"
     message: str
+
+
+# ============================================================================
+# Image Detection Models
+# ============================================================================
+
+class SignalBreakdown(BaseModel):
+    """Individual analyzer result in the signal breakdown."""
+    analyzer: str
+    display_name: str
+    score: float = Field(..., ge=0.0, le=1.0)
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    reasoning: str
+    processing_time_ms: int = 0
+    error: Optional[str] = None
+
+
+class ImageDetectionRequest(BaseModel):
+    """Request model for image detection (Base64 input)."""
+    imageBase64: str = Field(
+        ...,
+        description="Base64-encoded image data"
+    )
+    imageFormat: Literal["jpg", "jpeg", "png", "webp", "bmp", "gif"] = Field(
+        default="jpg",
+        description="Image format"
+    )
+    mode: Literal["quick", "standard", "thorough"] = Field(
+        default="standard",
+        description="Detection mode: quick (~2s), standard (~10s), thorough (~25s)"
+    )
+
+
+class ImageDetectionResponse(BaseModel):
+    """Response model for image detection."""
+    status: Literal["success"] = "success"
+    classification: Literal["AI_GENERATED", "HUMAN", "INCONCLUSIVE"]
+    confidenceScore: float = Field(..., ge=0.0, le=1.0)
+    confidence: str  # "High" | "Medium" | "Low"
+    explanation: str
+    generatorGuess: Optional[str] = None
+    signalBreakdown: List[SignalBreakdown] = []
+    heatmapBase64: Optional[str] = None

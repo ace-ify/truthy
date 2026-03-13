@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:sightengine.com)",
+      "WebFetch(domain:www.zerogpt.com)",
+      "WebFetch(domain:undetectable.ai)",
+      "WebFetch(domain:imagewhisperer.org)",
+      "WebFetch(domain:quillbot.com)",
+      "WebFetch(domain:notegpt.io)",
+      "WebSearch",
+      "mcp__chrome-devtools__new_page",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "mcp__chrome-devtools__navigate_page",
+      "Bash(pip install:*)",
+      "Bash(C:/Users/ace21/miniconda3/envs/venv/python.exe:*)"
+    ]
+  }
+}
