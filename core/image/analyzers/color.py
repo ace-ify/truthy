@@ -12,7 +12,7 @@ class ColorAnalyzer(BaseAnalyzer):
 
     name = "color"
     display_name = "Color Analysis"
-    weight = 0.9
+    weight = 0.3
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         img = image_data.np_array.astype(np.float64) / 255.0

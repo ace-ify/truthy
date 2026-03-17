@@ -3,21 +3,22 @@ Noise Pattern Analyzer.
 Real cameras leave sensor-specific noise (PRNU). AI images lack this.
 Analyzes noise residual characteristics and spatial correlation.
 """
+
 import numpy as np
 from core.image.analyzers.base import BaseAnalyzer, AnalyzerResult
 from core.image.preprocessor import ImageData
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from config import NOISE_BLOCK_SIZE
 
 
 class NoiseAnalyzer(BaseAnalyzer):
-
     name = "noise"
     display_name = "Noise Pattern Analysis"
-    weight = 1.4
+    weight = 0.6
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = image_data.grayscale  # float64, 0-1
@@ -26,6 +27,7 @@ class NoiseAnalyzer(BaseAnalyzer):
         # --- Extract noise residual ---
         # Denoise using simple Gaussian filter, then subtract
         from scipy.ndimage import gaussian_filter, uniform_filter
+
         denoised = gaussian_filter(gray, sigma=1.5)
         noise_residual = gray - denoised
 
@@ -68,13 +70,13 @@ class NoiseAnalyzer(BaseAnalyzer):
         block_vars = []
         for y in range(0, h - block_size, block_size):
             for x in range(0, w - block_size, block_size):
-                block = noise_residual[y:y + block_size, x:x + block_size]
+                block = noise_residual[y : y + block_size, x : x + block_size]
                 block_vars.append(np.var(block))
 
         block_vars = np.array(block_vars) if block_vars else np.array([noise_var])
         var_of_vars = np.var(block_vars)
         mean_of_vars = np.mean(block_vars)
-        noise_consistency = 1.0 - min(var_of_vars / (mean_of_vars ** 2 + 1e-10), 1.0)
+        noise_consistency = 1.0 - min(var_of_vars / (mean_of_vars**2 + 1e-10), 1.0)
 
         # --- Signal 4: Channel noise correlation ---
         # Real camera noise is correlated across RGB channels (same sensor)
@@ -103,7 +105,7 @@ class NoiseAnalyzer(BaseAnalyzer):
         noise_std = np.std(noise_flat)
         if noise_std > 1e-10:
             standardized = (noise_flat - noise_mean) / noise_std
-            kurtosis = np.mean(standardized ** 4) - 3  # Excess kurtosis (0 = Gaussian)
+            kurtosis = np.mean(standardized**4) - 3  # Excess kurtosis (0 = Gaussian)
         else:
             kurtosis = 0.0
 
@@ -120,13 +122,19 @@ class NoiseAnalyzer(BaseAnalyzer):
         autocorr_score = max(0.3 - avg_autocorr, 0) / 0.3 if avg_autocorr < 0.3 else 0.0
 
         # Low channel correlation = independent noise = suspicious
-        channel_score = max(0.4 - channel_correlation, 0) / 0.4 if channel_correlation < 0.4 else 0.0
+        channel_score = (
+            max(0.4 - channel_correlation, 0) / 0.4
+            if channel_correlation < 0.4
+            else 0.0
+        )
 
         # Non-Gaussian noise distribution
         kurtosis_score = min(abs(kurtosis) / 5.0, 1.0) if abs(kurtosis) > 1.0 else 0.0
 
         # Inconsistent block noise
-        inconsistency_score = 1.0 - noise_consistency if noise_consistency < 0.7 else 0.0
+        inconsistency_score = (
+            1.0 - noise_consistency if noise_consistency < 0.7 else 0.0
+        )
 
         signal_score = (
             low_noise_score * 0.20
@@ -137,9 +145,17 @@ class NoiseAnalyzer(BaseAnalyzer):
         )
         signal_score = np.clip(signal_score, 0.0, 1.0)
 
-        # Confidence
+        # Confidence: reduce for small images AND for JPEG images where
+        # compression destroys the very sensor noise patterns we're looking for.
+        # Messaging apps (WhatsApp, Telegram) recompress at Q70-80, which
+        # eliminates PRNU and makes noise analysis unreliable.
         size_factor = min(min(h, w) / 256, 1.0)
-        confidence = 0.40 + 0.35 * size_factor
+        is_jpeg = image_data.original_format.upper() in ("JPEG", "JPG")
+        if is_jpeg:
+            # JPEG compression destroys sensor noise — lower confidence
+            confidence = 0.25 + 0.25 * size_factor  # 0.25-0.50 range
+        else:
+            confidence = 0.40 + 0.35 * size_factor  # 0.40-0.75 range
 
         # Reasoning
         reasons = []
@@ -155,8 +171,11 @@ class NoiseAnalyzer(BaseAnalyzer):
             reasons.append("inconsistent noise variance across regions")
 
         if signal_score > 0.5:
-            reasoning = "Noise analysis suggests AI generation: " + "; ".join(reasons) if reasons else \
-                "Noise patterns differ from real camera sensor characteristics"
+            reasoning = (
+                "Noise analysis suggests AI generation: " + "; ".join(reasons)
+                if reasons
+                else "Noise patterns differ from real camera sensor characteristics"
+            )
         else:
             reasoning = "Noise patterns are consistent with real camera sensor capture"
 

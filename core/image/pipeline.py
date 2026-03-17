@@ -101,12 +101,16 @@ class ImageDetectionPipeline:
 
         # Select analyzers based on mode
         if mode == "quick":
-            analyzers_to_run = self.analyzers[:3]  # First 3 (fastest)
+            # Quick: run CNN + CLIP (ML models) + frequency + ELA for a fast but ML-backed result
+            quick_names = {"cnn_detector", "clip_detector", "frequency", "ela"}
+            analyzers_to_run = [a for a in self.analyzers if a.name in quick_names]
+            if not analyzers_to_run:
+                analyzers_to_run = self.analyzers[:3]  # Fallback if no ML models loaded
         else:
             analyzers_to_run = self.analyzers
 
         if mode == "thorough":
-            judge_mode = judge_mode or "llm"
+            judge_mode = judge_mode or JUDGE_MODE  # Respect configured judge mode
         else:
             judge_mode = judge_mode or JUDGE_MODE
 
@@ -187,12 +191,15 @@ class ImageDetectionPipeline:
         start_time = time.perf_counter()
 
         if mode == "quick":
-            analyzers_to_run = self.analyzers[:3]
+            quick_names = {"cnn_detector", "clip_detector", "frequency", "ela"}
+            analyzers_to_run = [a for a in self.analyzers if a.name in quick_names]
+            if not analyzers_to_run:
+                analyzers_to_run = self.analyzers[:3]
         else:
             analyzers_to_run = self.analyzers
 
         if mode == "thorough":
-            judge_mode = judge_mode or "llm"
+            judge_mode = judge_mode or JUDGE_MODE  # Respect configured judge mode
         else:
             judge_mode = judge_mode or JUDGE_MODE
 

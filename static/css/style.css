@@ -377,3 +377,42 @@ body {
 .animate-spin {
     animation: spin 1s linear infinite;
 }
+
+/* ==========================================================================
+   Image Modal Styles
+   ========================================================================== */
+
+/* Image drop zone drag-over effect */
+#image-drop-zone.border-purple-500 {
+    border-color: #a855f7;
+    background-color: rgba(168, 85, 247, 0.05);
+}
+
+/* Signal bar animation for image results */
+@keyframes img-signal-grow {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: var(--target);
+    }
+}
+
+.img-signal-bar {
+    animation: img-signal-grow 0.8s ease-out both;
+}
+
+/* Image results slide-in */
+#image-results:not(.hidden) {
+    animation: result-slide-in 0.3s ease-out;
+}
+
+/* Image modal active state */
+#image-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#image-modal.active > div:last-child {
+    transform: scale(1);
+}

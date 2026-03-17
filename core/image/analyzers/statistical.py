@@ -12,7 +12,7 @@ class StatisticalAnalyzer(BaseAnalyzer):
 
     name = "statistical"
     display_name = "Statistical Analysis"
-    weight = 0.8
+    weight = 0.3
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         img = image_data.np_array  # uint8 HxWx3

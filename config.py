@@ -6,8 +6,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load .env file
-load_dotenv()
+# Load .env file from project root (works regardless of working directory)
+_env_path = Path(__file__).parent / ".env"
+load_dotenv(_env_path, override=True)
 
 # Suppress noisy third-party loggers
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -49,17 +50,17 @@ ELA_QUALITY = 90                # JPEG quality for Error Level Analysis resave
 NOISE_BLOCK_SIZE = 64           # Block size for noise pattern analysis
 
 # Image Model Settings
-IMAGE_CNN_MODEL_ID = "umm-maybe/AI-image-detector"  # HF AI image classifier
+IMAGE_CNN_MODEL_ID = "Organika/sdxl-detector"    # Swin-based, trained on modern AI outputs
 CLIP_MODEL_ID = "openai/clip-vit-large-patch14"      # CLIP for UnivFD-style detection
 
-# Judge Settings
+# Judge Settings — "hybrid" uses weighted ensemble + LLM fallback for borderline cases
 JUDGE_MODE = os.getenv("JUDGE_MODE", "weighted")  # "weighted" | "llm" | "hybrid"
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 JUDGE_LLM_MODEL = "gemini-2.0-flash"
 
 # Groq Settings (free alternative LLM judge)
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile").strip()
 
 # Which LLM provider to use for the judge: "gemini" or "groq"
 # Auto-detected: uses Groq if GROQ_API_KEY is set, else Gemini if GEMINI_API_KEY is set
@@ -81,8 +82,8 @@ ENABLED_ANALYZERS = [
 
 ENABLED_MODEL_DETECTORS = [
     "cnn_detector",
-    "clip_detector",
-    "dire_detector",
+    # "clip_detector",   # Disabled: zero-shot CLIP has no discriminative power (always says AI ~97%)
+    # "dire_detector",   # Disabled: DCT approximation always gives 0.825, no discrimination
     "trufor_heatmap",
 ]
 

@@ -3,29 +3,50 @@ Metadata/EXIF Analyzer.
 Checks for camera info, AI generator markers, and suspicious metadata patterns.
 Low weight — metadata is easily faked/stripped, but free to check.
 """
+
 from core.image.analyzers.base import BaseAnalyzer, AnalyzerResult
 from core.image.preprocessor import ImageData
 
 
 # Known AI generator software markers
 AI_SOFTWARE_MARKERS = [
-    "stable diffusion", "midjourney", "dall-e", "dalle",
-    "comfyui", "automatic1111", "invoke ai", "novelai",
-    "adobe firefly", "flux", "ideogram", "leonardo",
-    "runway", "playground", "bing image creator",
-    "copilot", "gemini", "chatgpt", "gpt-4",
+    "stable diffusion",
+    "midjourney",
+    "dall-e",
+    "dalle",
+    "comfyui",
+    "automatic1111",
+    "invoke ai",
+    "novelai",
+    "adobe firefly",
+    "flux",
+    "ideogram",
+    "leonardo",
+    "runway",
+    "playground",
+    "bing image creator",
+    "copilot",
+    "gemini",
+    "chatgpt",
+    "gpt-4",
 ]
 
 # Legitimate camera/editing software
 CAMERA_SOFTWARE = [
-    "adobe photoshop", "adobe lightroom", "lightroom",
-    "capture one", "dxo", "darktable", "rawtherapee",
-    "snapseed", "vsco", "gimp",
+    "adobe photoshop",
+    "adobe lightroom",
+    "lightroom",
+    "capture one",
+    "dxo",
+    "darktable",
+    "rawtherapee",
+    "snapseed",
+    "vsco",
+    "gimp",
 ]
 
 
 class MetadataAnalyzer(BaseAnalyzer):
-
     name = "metadata"
     display_name = "Metadata Analysis"
     weight = 0.5  # Low weight — metadata is unreliable
@@ -38,14 +59,17 @@ class MetadataAnalyzer(BaseAnalyzer):
         reasons = []
 
         # --- Signal 1: EXIF presence ---
+        # NOTE: Missing EXIF is common in legitimate images too — messaging apps
+        # (WhatsApp, Telegram, Signal) strip EXIF, as do social media platforms,
+        # screenshots, and many web images. Keep this signal weak.
         has_exif = meta.get("exif_present", False)
         exif_tag_count = meta.get("exif_tags", 0)
 
         if not has_exif:
-            signals["no_exif"] = 0.6
-            reasons.append("no EXIF metadata found (common in AI images)")
+            signals["no_exif"] = 0.30
+            reasons.append("no EXIF metadata (common in AI images and messaging apps)")
         elif exif_tag_count < 5:
-            signals["sparse_exif"] = 0.4
+            signals["sparse_exif"] = 0.20
             reasons.append("very sparse EXIF data")
         else:
             signals["has_exif"] = 0.0
@@ -58,7 +82,7 @@ class MetadataAnalyzer(BaseAnalyzer):
             signals["has_camera"] = 0.0
             reasons.append(f"camera info: {camera_make} {camera_model}")
         elif has_exif and not camera_make:
-            signals["no_camera"] = 0.4
+            signals["no_camera"] = 0.25
             reasons.append("EXIF present but no camera info")
 
         # --- Signal 3: Software field ---
@@ -81,9 +105,10 @@ class MetadataAnalyzer(BaseAnalyzer):
                 signals["unknown_software"] = 0.3
 
         # --- Signal 4: Color profile ---
+        # Missing color profiles are common in messaging-app and web images
         has_profile = meta.get("has_color_profile", False)
         if not has_profile:
-            signals["no_color_profile"] = 0.3
+            signals["no_color_profile"] = 0.15
         else:
             signals["has_color_profile"] = 0.0
 
@@ -98,8 +123,16 @@ class MetadataAnalyzer(BaseAnalyzer):
         # Common AI generator resolutions
         w, h = image_data.final_size
         ai_resolutions = [
-            (512, 512), (768, 768), (1024, 1024), (1536, 1024), (1024, 1536),
-            (1024, 768), (768, 1024), (2048, 2048), (1792, 1024), (1024, 1792),
+            (512, 512),
+            (768, 768),
+            (1024, 1024),
+            (1536, 1024),
+            (1024, 1536),
+            (1024, 768),
+            (768, 1024),
+            (2048, 2048),
+            (1792, 1024),
+            (1024, 1792),
         ]
         is_ai_resolution = (w, h) in ai_resolutions or (h, w) in ai_resolutions
         if is_ai_resolution:
@@ -125,8 +158,11 @@ class MetadataAnalyzer(BaseAnalyzer):
         confidence = 0.30 if not ai_detected else 0.60
 
         if signal_score > 0.5:
-            reasoning = "Metadata suggests AI generation: " + "; ".join(reasons[:3]) if reasons else \
-                "Metadata patterns are suspicious"
+            reasoning = (
+                "Metadata suggests AI generation: " + "; ".join(reasons[:3])
+                if reasons
+                else "Metadata patterns are suspicious"
+            )
         else:
             reasoning = "Metadata is consistent with authentic image capture"
             if reasons:

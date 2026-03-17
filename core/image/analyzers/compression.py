@@ -14,7 +14,7 @@ class CompressionAnalyzer(BaseAnalyzer):
 
     name = "compression"
     display_name = "Compression Analysis"
-    weight = 0.8
+    weight = 0.4
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = image_data.grayscale

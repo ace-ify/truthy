@@ -13,7 +13,7 @@ class GeometryAnalyzer(BaseAnalyzer):
 
     name = "geometry"
     display_name = "Geometry Analysis"
-    weight = 0.7  # Lower weight — not always applicable
+    weight = 0.3  # Lower weight — not always applicable
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = image_data.grayscale

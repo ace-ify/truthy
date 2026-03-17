@@ -473,6 +473,7 @@ async def api_info():
             "POST /api/analyze": "Analyze uploaded audio file (legacy)",
             "POST /api/image-detection": "Detect AI-generated images (Base64, requires API key)",
             "POST /api/image-analyze": "Detect AI-generated images (file upload)",
+            "POST /api/image-stream": "Stream image analysis results as SSE (file upload)",
             "GET /api/health": "Check API health and model status"
         }
     }

@@ -19,7 +19,7 @@ class ELAAnalyzer(BaseAnalyzer):
 
     name = "ela"
     display_name = "Error Level Analysis"
-    weight = 1.3
+    weight = 0.8
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         pil_image = image_data.pil_image
@@ -103,16 +103,42 @@ class ELAAnalyzer(BaseAnalyzer):
         # Low kurtosis = suspicious
         kurtosis_score = max(0.5 - kurtosis / 10, 0) if kurtosis < 3 else 0.0
 
+        # --- Signal 5: Multi-quality ELA consistency ---
+        # AI images maintain high ELA even at higher quality resaves
+        # Real photos show much lower ELA at Q95 vs Q90
+        # Only applies to JPEG images (PNG always has high ELA)
+        is_jpeg = image_data.original_format.upper() in ("JPEG", "JPG")
+        multi_q_score = 0.0
+        q95_mean_ela = 0.0
+        q_ratio = 0.0
+
+        if is_jpeg and mean_ela > 0.5:
+            # Resave at Q95 and compare
+            buffer95 = io.BytesIO()
+            pil_image.save(buffer95, format="JPEG", quality=95)
+            buffer95.seek(0)
+            resaved95 = Image.open(buffer95)
+            resaved95_arr = np.array(resaved95, dtype=np.float64)
+            diff95 = np.abs(original_arr - resaved95_arr)
+            q95_mean_ela = diff95.mean(axis=2).mean()
+
+            # AI faces: Q95 mean > 0.90, real portraits: Q95 mean < 0.55
+            # Q95/Q90 ratio: AI ~0.80, real portraits ~0.47-0.72
+            q_ratio = q95_mean_ela / (mean_ela + 1e-10)
+
+            if q95_mean_ela > 0.80 and q_ratio > 0.75:
+                multi_q_score = min((q95_mean_ela - 0.80) / 0.40, 1.0)
+
         signal_score = (
-            uniformity_score * 0.35
-            + contrast_score * 0.30
-            + kurtosis_score * 0.20
-            + low_ela_score * 0.15
+            uniformity_score * 0.30
+            + contrast_score * 0.25
+            + kurtosis_score * 0.15
+            + low_ela_score * 0.10
+            + multi_q_score * 0.20
         )
         signal_score = np.clip(signal_score, 0.0, 1.0)
 
         # Confidence: ELA is more reliable for JPEG images
-        is_jpeg = image_data.original_format.upper() in ("JPEG", "JPG")
         confidence = 0.65 if is_jpeg else 0.40
 
         # Reasoning
@@ -123,6 +149,8 @@ class ELAAnalyzer(BaseAnalyzer):
             reasons.append("low edge-to-interior ELA contrast")
         if kurtosis_score > 0.5:
             reasons.append("ELA distribution shape inconsistent with natural photography")
+        if multi_q_score > 0.3:
+            reasons.append("high ELA persists at multiple quality levels")
 
         if signal_score > 0.5:
             reasoning = "ELA indicates potential AI generation: " + "; ".join(reasons) if reasons else \
@@ -146,6 +174,9 @@ class ELAAnalyzer(BaseAnalyzer):
                 "skewness": float(skewness),
                 "kurtosis": float(kurtosis),
                 "kurtosis_score": float(kurtosis_score),
+                "q95_mean_ela": float(q95_mean_ela),
+                "q_ratio": float(q_ratio),
+                "multi_q_score": float(multi_q_score),
                 "is_jpeg": is_jpeg,
             },
         )

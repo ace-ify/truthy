@@ -13,7 +13,7 @@ class EdgeAnalyzer(BaseAnalyzer):
 
     name = "edge"
     display_name = "Edge Analysis"
-    weight = 1.0
+    weight = 0.4
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = image_data.grayscale  # float64, 0-1
@@ -54,7 +54,9 @@ class EdgeAnalyzer(BaseAnalyzer):
         if strong_edges.any():
             strong_directions = grad_direction[strong_edges]
             # Histogram of edge directions (circular)
-            dir_hist, _ = np.histogram(strong_directions, bins=36, range=(-np.pi, np.pi), density=True)
+            dir_hist, _ = np.histogram(strong_directions, bins=36, range=(-np.pi, np.pi))
+            dir_hist = dir_hist.astype(np.float64)
+            dir_hist = dir_hist / (dir_hist.sum() + 1e-10)  # normalize to probabilities
             dir_entropy = -np.sum(dir_hist[dir_hist > 0] * np.log2(dir_hist[dir_hist > 0]))
             max_dir_entropy = np.log2(36)
             dir_uniformity = dir_entropy / max_dir_entropy  # 1.0 = uniform, <1.0 = biased

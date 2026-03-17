@@ -46,6 +46,6 @@ tmp/
 htmlcov/
 .coverage
 
-# Models
-models/
+# Cached model weights (not source code)
+/models/
 silero_vad.jit

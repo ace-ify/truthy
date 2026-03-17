@@ -12,7 +12,7 @@ class FrequencyAnalyzer(BaseAnalyzer):
 
     name = "frequency"
     display_name = "Frequency Analysis"
-    weight = 1.5  # High value signal
+    weight = 0.6  # Lower weight — web-compressed images trigger false positives
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = image_data.grayscale
@@ -95,8 +95,14 @@ class FrequencyAnalyzer(BaseAnalyzer):
         # --- Combine signals into score ---
         # Higher roughness = more likely AI (periodic artifacts)
         roughness_score = min(roughness * 50, 1.0)
-        # Unusual HF ratio
-        hf_score = min(abs(hf_ratio - 0.15) * 5, 1.0) if hf_ratio > 0.25 else 0.0
+        # Unusual HF ratio — natural images have hf_ratio in 0.4-0.8 range
+        # Only flag extreme values outside this natural range
+        if hf_ratio > 0.85:
+            hf_score = min((hf_ratio - 0.85) * 5, 1.0)
+        elif hf_ratio < 0.15:
+            hf_score = min((0.15 - hf_ratio) * 5, 1.0)
+        else:
+            hf_score = 0.0
         # Spectral peaks
         peak_score = min(peak_ratio * 20, 1.0)
         # High angular uniformity = suspicious (grid artifacts)

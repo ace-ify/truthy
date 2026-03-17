@@ -12,7 +12,7 @@ class TextureAnalyzer(BaseAnalyzer):
 
     name = "texture"
     display_name = "Texture Analysis"
-    weight = 1.1
+    weight = 0.5
 
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
         gray = (image_data.grayscale * 255).astype(np.uint8)

@@ -852,3 +852,493 @@ document.addEventListener('DOMContentLoaded', () => {
     update(currentIndex);
   };
 })();
+
+// ==========================================================================
+// Mobile Menu Toggle
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+});
+
+// ==========================================================================
+// Image Detection API Client
+// ==========================================================================
+const ImageDetectionAPI = {
+  baseUrl: window.location.origin,
+
+  async analyzeStream(file, mode) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${this.baseUrl}/api/image-stream?mode=${mode}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail?.message || err.message || 'Analysis failed');
+    }
+
+    return response;
+  },
+
+  async analyzeFallback(file, mode) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${this.baseUrl}/api/image-analyze?mode=${mode}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail?.message || data.message || 'Analysis failed');
+    }
+    return data;
+  }
+};
+
+// ==========================================================================
+// Image Upload Modal Controller
+// ==========================================================================
+const ImageUploadModal = {
+  modal: null,
+  dropZone: null,
+  fileInput: null,
+  analyzeBtn: null,
+  selectedFile: null,
+  selectedMode: 'standard',
+
+  init() {
+    this.modal = document.getElementById('image-modal');
+    this.dropZone = document.getElementById('image-drop-zone');
+    this.fileInput = document.getElementById('image-file-input');
+    this.analyzeBtn = document.getElementById('image-analyze-btn');
+
+    if (!this.modal) return;
+
+    this.setupEventListeners();
+  },
+
+  setupEventListeners() {
+    // Open modal triggers
+    document.querySelectorAll('[data-open-image-modal]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.open();
+      });
+    });
+
+    // Close modal triggers
+    document.querySelectorAll('[data-close-image-modal]').forEach(btn => {
+      btn.addEventListener('click', () => this.close());
+    });
+
+    // Close on backdrop click
+    this.modal?.addEventListener('click', (e) => {
+      if (e.target === this.modal) this.close();
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.modal?.classList.contains('active')) {
+        this.close();
+      }
+    });
+
+    // Mode selection
+    document.querySelectorAll('.img-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.img-mode-btn').forEach(b => {
+          b.classList.remove('bg-white/10', 'text-white');
+          b.classList.add('text-gray-400');
+        });
+        btn.classList.add('bg-white/10', 'text-white');
+        btn.classList.remove('text-gray-400');
+        this.selectedMode = btn.dataset.imgMode;
+      });
+    });
+
+    // Drag and drop
+    if (this.dropZone) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+        this.dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+
+      ['dragenter', 'dragover'].forEach(evt => {
+        this.dropZone.addEventListener(evt, () => {
+          this.dropZone.classList.add('border-purple-500', 'bg-purple-500/5');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(evt => {
+        this.dropZone.addEventListener(evt, () => {
+          this.dropZone.classList.remove('border-purple-500', 'bg-purple-500/5');
+        });
+      });
+
+      this.dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) this.handleFile(files[0]);
+      });
+
+      this.dropZone.addEventListener('click', () => {
+        this.fileInput?.click();
+      });
+    }
+
+    // File input change
+    this.fileInput?.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) this.handleFile(e.target.files[0]);
+    });
+
+    // Analyze button
+    this.analyzeBtn?.addEventListener('click', () => this.analyze());
+
+    // Reset button
+    document.getElementById('image-reset-btn')?.addEventListener('click', () => this.resetToUpload());
+  },
+
+  handleFile(file) {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif'];
+    const ext = file.name.toLowerCase().split('.').pop();
+    const validExts = ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'];
+
+    if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
+      this.showError('Please select a valid image file (JPG, PNG, WebP, BMP)');
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      this.showError('File size must be less than 20MB');
+      return;
+    }
+
+    this.selectedFile = file;
+    this.hideError();
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('image-preview-img').src = e.target.result;
+      document.getElementById('image-preview-name').textContent = file.name;
+      document.getElementById('image-preview-size').textContent = this.formatSize(file.size);
+      document.getElementById('image-drop-default').classList.add('hidden');
+      document.getElementById('image-drop-preview').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+
+    this.analyzeBtn.disabled = false;
+  },
+
+  formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  },
+
+  async analyze() {
+    if (!this.selectedFile) return;
+
+    this.hideError();
+    this.hideResults();
+    this.showLoading();
+
+    const chips = document.getElementById('image-analyzer-chips');
+    chips.innerHTML = '';
+    const loadingStatus = document.getElementById('image-loading-status');
+    loadingStatus.textContent = 'Starting forensic analysis...';
+
+    const streamResults = [];
+
+    try {
+      const response = await ImageDetectionAPI.analyzeStream(this.selectedFile, this.selectedMode);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+
+          try {
+            const event = JSON.parse(jsonStr);
+
+            if (event.type === 'start') {
+              loadingStatus.textContent = `Running ${event.total_analyzers} analyzers...`;
+            }
+            else if (event.type === 'analyzer_result') {
+              const chip = document.createElement('span');
+              const isHigh = event.score > 0.5;
+              const chipColor = event.error
+                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                : isHigh
+                  ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                  : 'bg-green-500/10 text-green-400 border-green-500/20';
+              chip.className = `px-3 py-1 rounded-full text-xs font-medium border ${chipColor}`;
+              chip.style.animation = 'fadeInUp 0.3s ease-out both';
+              chip.textContent = `${event.display_name} ${Math.round(event.score * 100)}%`;
+              chips.appendChild(chip);
+
+              loadingStatus.textContent = `${event.completed}/${event.total} analyzers complete...`;
+
+              streamResults.push({
+                analyzer: event.analyzer,
+                display_name: event.display_name,
+                score: event.score,
+                confidence: event.confidence,
+                weight: event.weight,
+                reasoning: event.reasoning,
+                processing_time_ms: event.processing_time_ms,
+                error: event.error || null,
+              });
+            }
+            else if (event.type === 'verdict') {
+              const classification = event.verdict === 'AI Generated' ? 'AI_GENERATED'
+                : event.verdict === 'Human Created' ? 'HUMAN' : 'INCONCLUSIVE';
+              const confidenceScore = classification === 'AI_GENERATED' ? event.overall_ai_probability
+                : classification === 'HUMAN' ? (1 - event.overall_ai_probability) : 0.5;
+
+              this.showResults({
+                classification,
+                confidenceScore: Math.round(confidenceScore * 100) / 100,
+                confidence: event.confidence,
+                explanation: event.explanation,
+                generatorGuess: event.generator_guess,
+                heatmapBase64: event.heatmap_b64,
+                signalBreakdown: streamResults,
+              });
+            }
+            else if (event.type === 'error') {
+              throw new Error(event.message);
+            }
+          } catch (parseErr) {
+            if (parseErr.message !== 'Unexpected end of JSON input') {
+              console.warn('SSE parse error:', parseErr);
+            }
+          }
+        }
+      }
+
+      // Fallback if no verdict arrived via SSE
+      const resultsEl = document.getElementById('image-results');
+      if (resultsEl && resultsEl.classList.contains('hidden')) {
+        const result = await ImageDetectionAPI.analyzeFallback(this.selectedFile, this.selectedMode);
+        this.showResults(result);
+      }
+
+    } catch (error) {
+      this.hideLoading();
+      this.showError(error.message || 'Analysis failed. Please try again.');
+    }
+  },
+
+  showResults(result) {
+    this.hideLoading();
+    const resultsEl = document.getElementById('image-results');
+    if (!resultsEl) return;
+
+    const isAI = result.classification === 'AI_GENERATED';
+    const isHuman = result.classification === 'HUMAN';
+    const prob = Math.round(result.confidenceScore * 100);
+
+    // Verdict icon
+    const iconEl = document.getElementById('img-verdict-icon');
+    if (isAI) {
+      iconEl.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-red-500/10';
+      iconEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-400"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    } else if (isHuman) {
+      iconEl.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-green-500/10';
+      iconEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+    } else {
+      iconEl.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-yellow-500/10';
+      iconEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-400"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+    }
+
+    // Verdict label
+    document.getElementById('img-verdict-label').textContent =
+      isAI ? 'AI Generated' : isHuman ? 'Human Created' : 'Inconclusive';
+    document.getElementById('img-verdict-label').className =
+      `text-xl font-bold ${isAI ? 'text-red-400' : isHuman ? 'text-green-400' : 'text-yellow-400'}`;
+
+    // Confidence
+    document.getElementById('img-verdict-confidence').textContent =
+      `${result.confidence} confidence`;
+
+    // Badge
+    const badge = document.getElementById('img-verdict-badge');
+    badge.textContent = `${prob}%`;
+    badge.className = `px-3 py-1.5 rounded-full text-sm font-semibold ${
+      isAI ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+      : isHuman ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+      : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+    }`;
+
+    // Probability bar
+    const barPct = isAI ? prob : isHuman ? (100 - prob) : 50;
+    const bar = document.getElementById('img-probability-bar');
+    bar.style.width = '0%';
+    requestAnimationFrame(() => {
+      bar.style.width = barPct + '%';
+    });
+    bar.className = `h-full rounded-full transition-all duration-1000 ease-out ${
+      barPct > 65 ? 'bg-gradient-to-r from-orange-500 to-red-500'
+      : barPct > 35 ? 'bg-gradient-to-r from-yellow-500 to-orange-400'
+      : 'bg-gradient-to-r from-green-500 to-emerald-400'
+    }`;
+    document.getElementById('img-probability-text').textContent = barPct + '% AI probability';
+
+    // Explanation
+    document.getElementById('img-explanation').textContent = result.explanation;
+
+    // Generator guess
+    const genSection = document.getElementById('img-generator');
+    if (result.generatorGuess) {
+      genSection.classList.remove('hidden');
+      document.getElementById('img-generator-text').textContent = result.generatorGuess;
+    } else {
+      genSection.classList.add('hidden');
+    }
+
+    // Heatmap
+    const heatmapSection = document.getElementById('img-heatmap-section');
+    if (result.heatmapBase64) {
+      heatmapSection.classList.remove('hidden');
+      document.getElementById('img-heatmap').src = 'data:image/png;base64,' + result.heatmapBase64;
+    } else {
+      heatmapSection.classList.add('hidden');
+    }
+
+    // Signal breakdown
+    this.renderSignals(result.signalBreakdown || []);
+
+    resultsEl.classList.remove('hidden');
+  },
+
+  renderSignals(signals) {
+    const list = document.getElementById('img-signals-list');
+    list.innerHTML = '';
+
+    const sorted = [...signals].sort((a, b) => b.score - a.score);
+
+    sorted.forEach((s, i) => {
+      const pct = Math.round(s.score * 100);
+      const confPct = Math.round(s.confidence * 100);
+      const isHigh = s.score > 0.5;
+      const isMed = s.score > 0.3;
+
+      const barColor = isHigh ? 'from-orange-500 to-red-500'
+        : isMed ? 'from-yellow-500 to-orange-400'
+        : 'from-green-500 to-emerald-400';
+
+      const textColor = isHigh ? 'text-red-400' : isMed ? 'text-yellow-400' : 'text-green-400';
+
+      const div = document.createElement('div');
+      div.style.animation = `fadeInUp 0.4s ease-out ${i * 80}ms both`;
+      div.innerHTML = `
+        <div class="flex items-center justify-between mb-1">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-medium text-gray-200">${s.display_name}</span>
+            ${s.error ? '<span class="text-xs text-red-400/70">(failed)</span>' : ''}
+          </div>
+          <span class="text-xs font-semibold ${textColor}">${pct}%</span>
+        </div>
+        <div class="h-1.5 bg-white/5 rounded-full overflow-hidden mb-1">
+          <div class="h-full rounded-full bg-gradient-to-r ${barColor} img-signal-bar" style="--target: ${pct}%"></div>
+        </div>
+        <p class="text-[11px] text-gray-500 leading-relaxed">${s.reasoning}</p>
+      `;
+      list.appendChild(div);
+    });
+  },
+
+  showLoading() {
+    document.getElementById('image-loading')?.classList.remove('hidden');
+    if (this.analyzeBtn) {
+      this.analyzeBtn.disabled = true;
+      document.getElementById('image-analyze-text').textContent = 'Analyzing...';
+    }
+  },
+
+  hideLoading() {
+    document.getElementById('image-loading')?.classList.add('hidden');
+    if (this.analyzeBtn) {
+      this.analyzeBtn.disabled = false;
+      document.getElementById('image-analyze-text').textContent = 'Analyze Image';
+    }
+  },
+
+  hideResults() {
+    document.getElementById('image-results')?.classList.add('hidden');
+  },
+
+  showError(message) {
+    const errorEl = document.getElementById('image-upload-error');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+  },
+
+  hideError() {
+    const errorEl = document.getElementById('image-upload-error');
+    if (errorEl) errorEl.classList.add('hidden');
+  },
+
+  resetToUpload() {
+    this.hideResults();
+    this.hideLoading();
+    this.hideError();
+    this.selectedFile = null;
+
+    if (this.fileInput) this.fileInput.value = '';
+    document.getElementById('image-drop-default')?.classList.remove('hidden');
+    document.getElementById('image-drop-preview')?.classList.add('hidden');
+
+    if (this.analyzeBtn) {
+      this.analyzeBtn.disabled = true;
+      document.getElementById('image-analyze-text').textContent = 'Analyze Image';
+    }
+  },
+
+  open() {
+    if (this.modal) {
+      this.modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  },
+
+  close() {
+    if (this.modal) {
+      this.modal.classList.remove('active');
+      document.body.style.overflow = '';
+      this.resetToUpload();
+    }
+  }
+};
+
+// Initialize Image Upload Modal on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  ImageUploadModal.init();
+});
