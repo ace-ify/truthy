@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truthy — Video Deepfake Forensics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .font-oswald { font-family: 'Oswald', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    @keyframes fadeInUp { 0% { opacity:0; transform:translateY(20px); } 100% { opacity:1; transform:translateY(0); } }
+    .animate-fade-in { animation: fadeInUp 0.5s ease-out both; }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+    .drop-active { border-color: #3b82f6 !important; background: rgba(59,130,246,0.05) !important; }
+  </style>
+</head>
+<body class="antialiased bg-[#000000] text-white min-h-screen selection:bg-blue-500 selection:text-white">
+
+  <!-- Background Gradients -->
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-15 brightness-100 contrast-150 mix-blend-soft-light"></div>
+  </div>
+
+  <!-- Shared Global Navigation Bar -->
+  <nav class="flex z-50 w-full pt-6 pr-4 pl-4 fixed top-0 left-0 right-0 items-center justify-center">
+    <div class="flex bg-black/90 backdrop-blur-md w-full max-w-5xl border-white/10 border rounded-full pt-4 pr-6 pb-4 pl-8 relative shadow-2xl items-center justify-between">
+      <!-- Logo -->
+      <a href="/" class="inline-flex items-center gap-3">
+        <img src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65" alt="Truthy" class="h-[21px]">
+        <span class="text-[11px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10 hidden sm:inline-block">Forensics</span>
+      </a>
+
+      <!-- Centered Links -->
+      <div class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+        <a href="/audio" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">Voice</a>
+        <a href="/image" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">Image</a>
+        <a href="/video" class="text-[13px] font-medium text-white bg-white/15 px-4 py-1.5 rounded-full transition-colors font-sans shadow-sm">Video</a>
+        <a href="/#api" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">API</a>
+      </div>
+
+      <!-- Right Action -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">All Features &rarr;</a>
+        <a href="/#pricing" class="bg-white text-black hover:bg-gray-200 transition-colors px-5 py-2 rounded-full text-xs font-semibold tracking-tight font-sans">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="relative z-10 max-w-4xl mx-auto px-4 pt-32 pb-16">
+    <!-- Header -->
+    <header class="text-center mb-10 animate-fade-in">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-400 text-xs font-medium mb-5">
+        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+        First-Principles Biological & Kinematic Verification
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent font-oswald tracking-tight">
+        Video Deepfake Forensics
+      </h1>
+      <p class="text-gray-400 text-base max-w-2xl mx-auto leading-relaxed">
+        Cross-modal optical photoplethysmography (rPPG biological heart rate) & audio-visual phoneme-viseme biomechanics to detect face-swaps, AI lip-sync, and synthetic generation.
+      </p>
+    </header>
+
+    <!-- Upload Box -->
+    <div class="glass rounded-3xl p-8 mb-8 animate-fade-in">
+      <div id="drop-zone" class="border-2 border-dashed border-white/20 rounded-2xl p-10 text-center cursor-pointer hover:border-blue-500/60 transition-all">
+        <input type="file" id="video-input" class="hidden" accept="video/mp4,video/webm,video/avi,video/quicktime">
+        <div class="flex flex-col items-center gap-3">
+          <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-blue-400 border border-white/10">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <p class="text-lg font-medium text-gray-200">Drag & drop video or <span class="text-blue-400 underline">browse</span></p>
+          <p class="text-xs text-gray-500">Supports MP4, WebM, MOV (Max 50MB · Analyzes facial capillary pulses and lip kinematics)</p>
+        </div>
+      </div>
+
+      <!-- File Selected Feedback -->
+      <div id="file-info" class="hidden mt-4 p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+          <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16m0 0l4-4m-4 4l-4-4m14-8v12a2 2 0 01-2 2H9a2 2 0 01-2-2V8a2 2 0 012-2h6l4 4z"/>
+          </svg>
+          <span id="file-name" class="text-sm text-gray-300 truncate font-medium"></span>
+        </div>
+        <button id="change-file-btn" class="text-xs text-gray-400 hover:text-white transition-colors ml-4 shrink-0">Change</button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading" class="hidden mt-6 text-center py-6">
+        <div class="inline-block animate-spin rounded-full h-9 w-9 border-2 border-blue-500/30 border-t-blue-500 mb-3"></div>
+        <p class="text-sm text-gray-300 font-medium">Extracting facial landmarks, rPPG blood volume pulse, and speech kinematics...</p>
+        <p class="text-xs text-gray-500 mt-1">Executing optical chrominance filtering & cross-modal synchronization</p>
+      </div>
+
+      <!-- Error message container -->
+      <div id="video-error" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-sm text-red-400 font-medium"></div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="hidden space-y-6 animate-fade-in">
+      <!-- Verdict Card -->
+      <div class="glass rounded-2xl p-6 border-l-4" id="verdict-card">
+        <div class="flex items-center justify-between mb-2">
+          <span id="verdict-badge" class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"></span>
+          <span id="confidence-badge" class="text-sm font-medium text-gray-400"></span>
+        </div>
+        <h2 id="verdict-title" class="text-2xl font-bold mb-2 font-oswald tracking-tight"></h2>
+        <p id="explanation-text" class="text-gray-300 text-sm leading-relaxed"></p>
+      </div>
+
+      <!-- Proof Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Biological Pulse Card -->
+        <div class="glass rounded-2xl p-6">
+          <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            Biological Pulse (rPPG)
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Cardiac Pulse Detected:</span>
+              <span id="rppg-detected" class="font-medium text-white"></span>
+            </div>
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Estimated Heart Rate:</span>
+              <span id="rppg-bpm" class="font-medium text-white"></span>
+            </div>
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Pulse Signal-to-Noise:</span>
+              <span id="rppg-snr" class="font-medium text-white"></span>
+            </div>
+          </div>
+          <div id="bvp-container" class="mt-4 hidden">
+            <p class="text-xs text-gray-400 mb-2 font-medium">Extracted Optical BVP Waveform:</p>
+            <img id="bvp-chart" class="w-full rounded-lg border border-white/10" alt="BVP Waveform">
+          </div>
+        </div>
+
+        <!-- Biomechanical Lip Kinematics Card -->
+        <div class="glass rounded-2xl p-6">
+          <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            Phoneme-Viseme Kinematics
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Kinematic Violations:</span>
+              <span id="lip-violations" class="font-medium text-white"></span>
+            </div>
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Total Frames Tracked:</span>
+              <span id="video-frames" class="font-medium text-white"></span>
+            </div>
+            <div class="flex justify-between border-b border-white/5 pb-2">
+              <span class="text-gray-400">Video Duration:</span>
+              <span id="video-duration" class="font-medium text-white"></span>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-4 leading-relaxed">
+            Measures plosive acoustic onsets (/p/, /b/, /m/) against anatomical inner-lip aperture kinematics to detect neural lip-sync generation.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="text-center pt-2">
+        <button id="retest-btn" class="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-sm font-medium text-white transition-all">
+          Analyze Another Video
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const videoInput = document.getElementById('video-input');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const changeFileBtn = document.getElementById('change-file-btn');
+    const videoError = document.getElementById('video-error');
+    const retestBtn = document.getElementById('retest-btn');
+
+    dropZone.onclick = () => videoInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drop-active'); };
+    dropZone.ondragleave = () => dropZone.classList.remove('drop-active');
+    dropZone.ondrop = (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drop-active');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    };
+    videoInput.onchange = () => {
+      if (videoInput.files.length) handleFile(videoInput.files[0]);
+    };
+    changeFileBtn.onclick = (e) => {
+      e.stopPropagation();
+      videoInput.click();
+    };
+    retestBtn.onclick = () => {
+      results.classList.add('hidden');
+      fileInfo.classList.add('hidden');
+      dropZone.classList.remove('hidden');
+      videoInput.value = '';
+    };
+
+    async function handleFile(file) {
+      videoError.classList.add('hidden');
+      videoError.textContent = '';
+      fileName.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+      fileInfo.classList.remove('hidden');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      loading.classList.remove('hidden');
+      results.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/video-analyze', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: 'Failed to analyze video.' }));
+          throw new Error(err.message || 'Error processing video.');
+        }
+
+        const data = await res.json();
+        renderResults(data);
+      } catch (err) {
+        videoError.textContent = err.message || 'Network error processing video.';
+        videoError.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    function renderResults(data) {
+      results.classList.remove('hidden');
+      const isAI = data.classification === 'AI_GENERATED';
+
+      const card = document.getElementById('verdict-card');
+      const badge = document.getElementById('verdict-badge');
+      const title = document.getElementById('verdict-title');
+
+      if (isAI) {
+        card.className = 'glass rounded-2xl p-6 border-l-4 border-red-500';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-red-500/20 text-red-400';
+        badge.textContent = 'Synthetic Video / Deepfake Detected';
+        title.textContent = `AI Generated (${(data.confidenceScore * 100).toFixed(0)}% confidence)`;
+      } else if (data.classification === 'HUMAN') {
+        card.className = 'glass rounded-2xl p-6 border-l-4 border-emerald-500';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-400';
+        badge.textContent = 'Authentic Biological Video Verified';
+        title.textContent = `Human Video (${(data.confidenceScore * 100).toFixed(0)}% confidence)`;
+      } else {
+        card.className = 'glass rounded-2xl p-6 border-l-4 border-amber-500';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-400';
+        badge.textContent = 'Inconclusive Media Evidence';
+        title.textContent = 'Inconclusive Analysis';
+      }
+
+      document.getElementById('confidence-badge').textContent = `${data.confidence} Confidence`;
+      document.getElementById('explanation-text').textContent = data.explanation;
+
+      // Pulse info
+      document.getElementById('rppg-detected').textContent = data.hasBiologicalPulse ? 'Yes (Living Subject)' : 'No (Synthetic/Absent)';
+      document.getElementById('rppg-detected').className = data.hasBiologicalPulse ? 'font-medium text-emerald-400' : 'font-medium text-red-400';
+      document.getElementById('rppg-bpm').textContent = data.detectedBpm ? `${data.detectedBpm} BPM` : 'N/A';
+      document.getElementById('rppg-snr').textContent = `${(data.pulseSnr * 100).toFixed(1)}%`;
+
+      // Kinematics info
+      document.getElementById('lip-violations').textContent = `${data.biomechanicalViolations} frames out-of-sync`;
+      document.getElementById('video-frames').textContent = `${data.totalFramesAnalyzed} frames (@ ${data.fps} FPS)`;
+      document.getElementById('video-duration').textContent = `${data.durationSeconds}s`;
+
+      // Chart
+      const bvpContainer = document.getElementById('bvp-container');
+      const bvpChart = document.getElementById('bvp-chart');
+      if (data.bvpChartBase64) {
+        bvpChart.src = `data:image/png;base64,${data.bvpChartBase64}`;
+        bvpContainer.classList.remove('hidden');
+      } else {
+        bvpContainer.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

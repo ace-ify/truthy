@@ -119,3 +119,33 @@ class ImageDetectionResponse(BaseModel):
     generatorGuess: Optional[str] = None
     signalBreakdown: List[SignalBreakdown] = []
     heatmapBase64: Optional[str] = None
+
+
+# ============================================================================
+# Video Detection Models
+# ============================================================================
+
+class VideoDetectionRequest(BaseModel):
+    """Request model for video detection API (Base64 input)."""
+    videoBase64: str = Field(..., description="Base64-encoded video data (MP4/WebM)")
+    videoFormat: Literal["mp4", "webm", "avi", "mov"] = Field(
+        default="mp4",
+        description="Video container format"
+    )
+
+
+class VideoDetectionResponse(BaseModel):
+    """Response model for video deepfake detection."""
+    status: Literal["success"] = "success"
+    classification: Literal["AI_GENERATED", "HUMAN", "INCONCLUSIVE"]
+    confidenceScore: float = Field(..., ge=0.0, le=1.0)
+    confidence: str
+    explanation: str
+    fps: float
+    durationSeconds: float
+    totalFramesAnalyzed: int
+    hasBiologicalPulse: bool
+    detectedBpm: Optional[float] = None
+    pulseSnr: float = 0.0
+    biomechanicalViolations: int = 0
+    bvpChartBase64: Optional[str] = None

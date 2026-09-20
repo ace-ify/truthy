@@ -78,6 +78,7 @@ ENABLED_ANALYZERS = [
     "compression",
     "statistical",
     "geometry",
+    "phase_coherence",
 ]
 
 ENABLED_MODEL_DETECTORS = [

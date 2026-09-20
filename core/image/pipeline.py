@@ -32,6 +32,7 @@ ANALYZER_REGISTRY = {
     "compression": ("core.image.analyzers.compression", "CompressionAnalyzer"),
     "statistical": ("core.image.analyzers.statistical", "StatisticalAnalyzer"),
     "geometry": ("core.image.analyzers.geometry", "GeometryAnalyzer"),
+    "phase_coherence": ("core.image.analyzers.phase_coherence", "PhaseCoherenceAnalyzer"),
 }
 
 MODEL_REGISTRY = {

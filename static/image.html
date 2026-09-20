@@ -8,8 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap">
   <style>
     * { font-family: 'Inter', sans-serif; }
+    .font-oswald { font-family: 'Oswald', sans-serif; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
@@ -26,25 +28,54 @@
     .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
   </style>
 </head>
-<body class="antialiased bg-[#000000] text-white min-h-screen">
+<body class="antialiased bg-[#000000] text-white min-h-screen selection:bg-blue-500 selection:text-white">
 
   <!-- Subtle background gradient -->
   <div class="fixed inset-0 z-0 pointer-events-none">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-0 right-0 w-[600px] h-[300px] bg-purple-500/5 rounded-full blur-[100px]"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[400px] bg-purple-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-15 brightness-100 contrast-150 mix-blend-soft-light"></div>
   </div>
 
+  <!-- Shared Global Navigation Bar -->
+  <nav class="flex z-50 w-full pt-6 pr-4 pl-4 fixed top-0 left-0 right-0 items-center justify-center">
+    <div class="flex bg-black/90 backdrop-blur-md w-full max-w-5xl border-white/10 border rounded-full pt-4 pr-6 pb-4 pl-8 relative shadow-2xl items-center justify-between">
+      <!-- Logo -->
+      <a href="/" class="inline-flex items-center gap-3">
+        <img src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65" alt="Truthy" class="h-[21px]">
+        <span class="text-[11px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10 hidden sm:inline-block">Forensics</span>
+      </a>
+
+      <!-- Centered Links -->
+      <div class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+        <a href="/audio" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">Voice</a>
+        <a href="/image" class="text-[13px] font-medium text-white bg-white/15 px-4 py-1.5 rounded-full transition-colors font-sans shadow-sm">Image</a>
+        <a href="/video" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">Video</a>
+        <a href="/#api" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">API</a>
+      </div>
+
+      <!-- Right Action -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">All Features &rarr;</a>
+        <a href="/#pricing" class="bg-white text-black hover:bg-gray-200 transition-colors px-5 py-2 rounded-full text-xs font-semibold tracking-tight font-sans">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
   <!-- Main container -->
-  <div class="relative z-10 max-w-4xl mx-auto px-4 py-8">
+  <div class="relative z-10 max-w-4xl mx-auto px-4 pt-32 pb-16">
 
     <!-- Header -->
     <header class="text-center mb-10 animate-fade-in">
-      <a href="/" class="inline-block mb-6 text-sm text-gray-500 hover:text-gray-300 transition-colors">&larr; Back to Home</a>
-      <h1 class="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
-        AI Image Detection
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-400 text-xs font-medium mb-5">
+        <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+        Multi-Signal Biophysical & Fourier Phase Verification
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent font-oswald tracking-tight">
+        Visual Deepfake Forensics
       </h1>
-      <p class="text-gray-400 text-lg max-w-xl mx-auto">
-        Multi-signal forensic analysis to detect AI-generated images with high accuracy
+      <p class="text-gray-400 text-base max-w-xl mx-auto leading-relaxed">
+        13-analyzer forensic ensemble featuring bi-spectral Fourier phase coherence, ELA, PRNU noise distributions, and TruFor localization heatmaps.
       </p>
     </header>
 

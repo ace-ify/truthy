@@ -62,21 +62,29 @@
           alt="Truthy" class="h-[21px]"></a>
 
       <!-- Centered Links -->
-      <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+      <div class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+        <a href="/audio"
+          class="text-[13px] font-medium text-white bg-white/15 px-4 py-1.5 rounded-full transition-colors font-sans shadow-sm">
+          Voice
+        </a>
         <a href="/image"
-          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
-          Image Detection
+          class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">
+          Image
+        </a>
+        <a href="/video"
+          class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">
+          Video
         </a>
         <a href="#api"
-          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">
           API
         </a>
         <a href="#features"
-          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">
           Features
         </a>
         <a href="#testimonials"
-          class="text-[14px] font-medium text-white hover:text-gray-300 transition-colors font-sans tracking-wide">
+          class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors font-sans">
           About
         </a>
       </div>
@@ -105,7 +113,9 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden fixed top-24 left-4 right-4 z-50 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl">
       <div class="flex flex-col gap-4">
-        <a href="/image" class="text-sm font-medium text-white hover:text-gray-300 transition-colors">Image Detection</a>
+        <a href="/audio" class="text-sm font-medium text-white hover:text-gray-300 transition-colors">Voice Detection</a>
+        <a href="/image" class="text-sm font-medium text-white hover:text-gray-300 transition-colors">Image Forensics</a>
+        <a href="/video" class="text-sm font-medium text-white hover:text-gray-300 transition-colors">Video Forensics</a>
         <a href="#api" class="text-sm font-medium text-white hover:text-gray-300 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('hidden')">API</a>
         <a href="#features" class="text-sm font-medium text-white hover:text-gray-300 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Features</a>
         <a href="#testimonials" class="text-sm font-medium text-white hover:text-gray-300 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('hidden')">About</a>
@@ -126,7 +136,7 @@
       </span>
       <span
         class="text-xs text-gray-300 padding-top-40 font-medium group-hover:text-white transition-colors pr-1 font-sans">
-        Multilingual Support · Image Detection
+        Multimodal Engine: Voice · Image · Video Forensics
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"
@@ -149,8 +159,7 @@
     <!-- Subheadline -->
     <p class="text-center text-xl text-gray-400 mt-8 max-w-2xl mx-auto leading-relaxed font-light font-sans scroll-item scroll-fade-up delay-200"
       style="animation-play-state: running;">
-      Your all-in-one solution for detecting AI-generated voices <span class="text-blue-400 font-medium">and images</span>, verifying authenticity, and protecting against deepfakes
-      effortlessly.
+      Your all-in-one platform for detecting AI-generated <span class="text-blue-400 font-medium">voices</span>, <span class="text-purple-400 font-medium">images</span>, and <span class="text-emerald-400 font-medium">videos</span> with first-principles biological, optical, and acoustic proofs.
     </p>
 
     <!-- CTA Buttons -->
@@ -196,47 +205,29 @@
           <path d="M5 12h14" class=""></path>
           <path d="m12 5 7 7-7 7" class=""></path>
         </svg>
-        <style id="border-gradient-shared-style">
-          [style*="--border-gradient"]::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            padding: 1px;
-            border-radius: var(--border-radius-before, inherit);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box,
-              linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box,
-              linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            background: var(--border-gradient);
-            pointer-events: none;
-          }
-        </style>
       </button>
       <button
-        class="sm:w-auto hover:bg-blue-500/10 hover:border-blue-400 hover:shadow-[0_0_35px_rgba(59,130,246,0.6),inset_0_0_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white bg-black/60 w-full border-blue-500 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 shadow-[0_0_20px_rgba(59,130,246,0.5),inset_0_0_10px_rgba(59,130,246,0.2)] gap-x-2 gap-y-2 items-center justify-center"
+        class="sm:w-auto hover:bg-purple-500/10 hover:border-purple-400 hover:shadow-[0_0_35px_rgba(168,85,247,0.6),inset_0_0_20px_rgba(168,85,247,0.4)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white bg-black/60 w-full border-purple-500 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 shadow-[0_0_20px_rgba(168,85,247,0.5),inset_0_0_10px_rgba(168,85,247,0.2)] gap-x-2 gap-y-2 items-center justify-center"
         data-open-image-modal>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors">
+          class="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <circle cx="9" cy="9" r="2"></circle>
           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
         </svg>
         Analyze Image
       </button>
-      <button onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})"
-        class="sm:w-auto hover:bg-white/5 hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-gray-400 hover:text-white bg-transparent w-full border-white/10 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 gap-x-2 gap-y-2 items-center justify-center">
+      <a href="/video"
+        class="sm:w-auto hover:bg-emerald-500/10 hover:border-emerald-400 hover:shadow-[0_0_35px_rgba(16,185,129,0.6),inset_0_0_20px_rgba(16,185,129,0.4)] hover:scale-[1.02] transition-all duration-300 flex group text-base font-medium text-white bg-black/60 w-full border-emerald-500 border rounded-full pt-3.5 pr-8 pb-3.5 pl-8 shadow-[0_0_20px_rgba(16,185,129,0.5),inset_0_0_10px_rgba(16,185,129,0.2)] gap-x-2 gap-y-2 items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          data-lucide="play-circle"
-          class="lucide lucide-play-circle w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors">
-          <path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"></path>
-          <circle cx="12" cy="12" r="10"></circle>
+          class="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors">
+          <path d="m22 8-6 4 6 4V8Z"></path>
+          <rect width="14" height="12" x="2" y="6" rx="2"></rect>
         </svg>
-        How It Works
-      </button>
+        Analyze Video
+      </a>
     </div>
 
     <!-- Visual / Phone Mockup Section -->
@@ -1279,6 +1270,130 @@
         </div>
       </div>
 
+      <!-- Video Forensics Section (03) -->
+      <div
+        class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-0 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 w-full">
+          <div class="flex flex-col gap-6 max-w-3xl">
+            <div class="flex gap-3 gap-x-3 gap-y-3 items-center scroll-item scroll-fade-up"
+              style="animation-play-state: running;">
+              <span
+                class="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/10 text-[11px] font-mono font-medium text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)] font-sans">
+                03
+              </span>
+              <span class="text-sm font-medium tracking-widest uppercase text-gray-500 font-sans">
+                Motion & Biomechanics
+              </span>
+            </div>
+            <h2
+              class="text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] font-oswald font-light tracking-tight scroll-item scroll-fade-up delay-100"
+              style="animation-play-state: running;">
+              Optical rPPG &
+              <span class="text-gray-600 font-oswald font-light tracking-tight">
+                Kinematic Forensics
+              </span>
+            </h2>
+            <p class="leading-relaxed text-lg font-light text-gray-400 max-w-xl scroll-item scroll-fade-up delay-200"
+              style="animation-play-state: running;">
+              Detect deepfake videos and neural face-swaps using first-principles biology: sub-dermal cardiac pulse detection (rPPG) and cross-modal phoneme-viseme speech synchrony.
+            </p>
+          </div>
+          <a href="/video"
+            class="group flex items-center gap-2 pl-6 pr-5 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-all duration-200 font-sans whitespace-nowrap scroll-item scroll-fade-up delay-300"
+            style="animation-play-state: running;">
+            <span class="font-sans">Launch Video Forensics</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-arrow-right w-4 h-4 transition-transform group-hover:translate-x-1">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- Card 1: Optical rPPG -->
+          <div
+            class="relative h-[320px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-between group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-100"
+            style="animation-play-state: running;">
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="relative z-10">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 border border-blue-500/20">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-blue-400">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-light text-white tracking-tight font-oswald">
+                Biological Pulse (rPPG)
+              </h3>
+              <p class="mt-2 text-sm font-light leading-relaxed text-gray-400">
+                Measures micro-vascular blood volume pulses across facial skin regions (POS chrominance filtering). Deepfakes lack synchronized cardiac hemodynamics.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2: Phoneme-Viseme Kinematics -->
+          <div
+            class="relative h-[320px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-between group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-200"
+            style="animation-play-state: running;">
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="relative z-10">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4 border border-emerald-500/20">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-emerald-400">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                  <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                  <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-light text-white tracking-tight font-oswald">
+                Speech Biomechanics
+              </h3>
+              <p class="mt-2 text-sm font-light leading-relaxed text-gray-400">
+                Evaluates millisecond-level correlation between acoustic plosives (/p/, /b/, /m/) and inner-lip aperture distances to expose synthetic lip-syncing.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3: Inter-Frame Coherence -->
+          <div
+            class="relative h-[320px] rounded-[2rem] bg-[#0A0A0C] border border-white/10 p-8 overflow-hidden flex flex-col justify-between group hover:border-white/[0.15] transition-colors scroll-item scroll-fade-up delay-300"
+            style="animation-play-state: running;">
+            <div
+              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0A0A0C] to-[#0A0A0C]">
+            </div>
+            <div class="relative z-10">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 border border-purple-500/20">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-purple-400">
+                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                  <path d="M7 3v18"></path>
+                  <path d="M3 7.5h4"></path>
+                  <path d="M3 12h18"></path>
+                  <path d="M3 16.5h4"></path>
+                  <path d="M17 3v18"></path>
+                  <path d="M17 7.5h4"></path>
+                  <path d="M17 16.5h4"></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-light text-white tracking-tight font-oswald">
+                BVP Signal Spectrum
+              </h3>
+              <p class="mt-2 text-sm font-light leading-relaxed text-gray-400">
+                Transforms facial RGB time series into frequency spectra to isolate cardiac signal-to-noise ratio (SNR) with automated chart generation.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <div id="api"
         class="flex flex-col bg-[#0A0A0C] border-[#ffffff]/10 border rounded-3xl mt-24 mb-24 pt-8 pr-8 pb-16 pl-8 gap-x-16 gap-y-16">
         <!-- Hero Section -->
@@ -2082,8 +2197,8 @@
               src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65"
               alt="Truthy" class="h-[40px] mb-4"></a>
           <p class="text-gray-400 text-sm leading-relaxed mb-6 font-sans">
-            Truthy is an advanced AI voice detection platform that identifies
-            synthetic speech across Tamil, English, Hindi, Malayalam, and Telugu.
+            Truthy is an enterprise-grade multimodal deepfake detection platform identifying
+            synthetic speech, AI-generated images, and deepfake videos with mathematical and biological proofs.
           </p>
           <div class="flex gap-4">
             <a href="#" class="text-gray-400 hover:text-white transition-colors">
@@ -2120,27 +2235,27 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-12 w-full font-sans">
           <div class="scroll-item scroll-fade-up delay-100" style="animation-play-state: running;">
             <h4 class="text-white font-medium mb-4 font-sans">
-              Product
+              Forensic Engines
             </h4>
             <ul class="space-y-3 text-sm text-gray-400">
               <li>
+                <a href="/audio" class="hover:text-blue-400 transition-colors font-sans">
+                  Voice Forensics
+                </a>
+              </li>
+              <li>
+                <a href="/image" class="hover:text-blue-400 transition-colors font-sans">
+                  Image Forensics
+                </a>
+              </li>
+              <li>
+                <a href="/video" class="hover:text-blue-400 transition-colors font-sans">
+                  Video Forensics
+                </a>
+              </li>
+              <li>
                 <a href="#api" class="hover:text-blue-400 transition-colors font-sans">
-                  API
-                </a>
-              </li>
-              <li>
-                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
-                  Languages
-                </a>
-              </li>
-              <li>
-                <a href="#pricing" class="hover:text-blue-400 transition-colors font-sans">
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#features" class="hover:text-blue-400 transition-colors font-sans">
-                  Updates
+                  API Integrations
                 </a>
               </li>
             </ul>

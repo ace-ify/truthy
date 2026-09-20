@@ -15,7 +15,7 @@ COPY requirements.txt .
 
 # Install Python dependencies
 # Use CPU-only PyTorch to save space
-RUN pip install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
@@ -26,6 +26,10 @@ EXPOSE 8080
 
 # Set environment variable for port
 ENV PORT=8080
+
+# Container Healthcheck probe
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health')" || exit 1
 
 # Run the application
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]

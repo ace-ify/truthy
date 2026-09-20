@@ -28,6 +28,7 @@ from api.models import (
     AnalysisResponse, ErrorResponse, HealthResponse,
     VoiceDetectionRequest, VoiceDetectionResponse, VoiceDetectionErrorResponse,
     ImageDetectionRequest, ImageDetectionResponse, SignalBreakdown,
+    VideoDetectionRequest, VideoDetectionResponse,
 )
 
 # Configure logging
@@ -52,8 +53,8 @@ limiter = Limiter(key_func=get_remote_address)
 
 @asynccontextmanager
 async def lifespan(app):
-    """Load all models on startup."""
-    init_models()
+    """Fast non-blocking startup: serve web UI immediately, lazy-load models on demand."""
+    logger.info("Truthy engine initialized. Models will lazy-load on first analysis request.")
     yield
 
 
@@ -217,6 +218,7 @@ def generate_explanation(ai_prob: float, classification: str, language: str) -> 
 
 
 @app.get("/")
+@app.get("/audio")
 async def root():
     return FileResponse(str(STATIC_DIR / "index.html"))
 
@@ -232,6 +234,11 @@ async def favicon():
 @app.get("/image")
 async def image_page():
     return FileResponse(str(STATIC_DIR / "image.html"))
+
+
+@app.get("/video")
+async def video_page():
+    return FileResponse(str(STATIC_DIR / "video.html"))
 
 
 @app.get("/api/health", response_model=HealthResponse)
@@ -474,6 +481,8 @@ async def api_info():
             "POST /api/image-detection": "Detect AI-generated images (Base64, requires API key)",
             "POST /api/image-analyze": "Detect AI-generated images (file upload)",
             "POST /api/image-stream": "Stream image analysis results as SSE (file upload)",
+            "POST /api/video-detection": "Detect deepfake video (Base64, requires API key)",
+            "POST /api/video-analyze": "Detect deepfake video (file upload)",
             "GET /api/health": "Check API health and model status"
         }
     }
@@ -721,6 +730,153 @@ async def image_stream(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ============================================================================
+# Video Detection API (Biological rPPG + Kinematics)
+# ============================================================================
+
+@limiter.limit("30/minute")
+@app.post("/api/video-detection", response_model=VideoDetectionResponse)
+async def video_detection(
+    request: VideoDetectionRequest,
+    api_key: str = Depends(verify_api_key),
+):
+    """
+    Detect deepfake video manipulation using optical remote photoplethysmography (rPPG)
+    and audio-visual phoneme-viseme biomechanical kinematics (Base64 input).
+    """
+    temp_path = None
+    try:
+        try:
+            video_bytes = base64.b64decode(request.videoBase64)
+        except Exception:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": "Invalid Base64 encoding for video data"}
+            )
+
+        if len(video_bytes) < 1000:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": "Video data too small or corrupt"}
+            )
+
+        max_bytes = 50 * 1024 * 1024  # 50MB limit
+        if len(video_bytes) > max_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": f"Video exceeds max size of {max_bytes // (1024*1024)}MB"}
+            )
+
+        file_ext = f".{request.videoFormat}"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+            temp_file.write(video_bytes)
+            temp_path = temp_file.name
+
+        from core.video.pipeline import get_video_pipeline
+        vpipe = get_video_pipeline()
+        verdict = vpipe.analyze_video(temp_path)
+
+        return VideoDetectionResponse(
+            status="success",
+            classification=verdict.verdict,
+            confidenceScore=round(
+                verdict.overall_ai_probability if verdict.verdict == "AI_GENERATED"
+                else 1.0 - verdict.overall_ai_probability if verdict.verdict == "HUMAN"
+                else 0.5,
+                2
+            ),
+            confidence=verdict.confidence,
+            explanation=verdict.explanation,
+            fps=verdict.fps,
+            durationSeconds=verdict.duration_seconds,
+            totalFramesAnalyzed=verdict.total_frames,
+            hasBiologicalPulse=verdict.rppg_results.get("has_pulse", False),
+            detectedBpm=verdict.rppg_results.get("bpm"),
+            pulseSnr=verdict.rppg_results.get("pulse_snr", 0.0),
+            biomechanicalViolations=verdict.lip_sync_results.get("biomechanical_violations", 0),
+            bvpChartBase64=verdict.bvp_chart_b64,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error processing video: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "error", "message": f"Error processing video: {str(e)}"}
+        )
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
+@app.post("/api/video-analyze", response_model=VideoDetectionResponse)
+async def video_analyze(
+    file: UploadFile = File(...),
+):
+    """
+    Detect deepfake video manipulation using optical remote photoplethysmography (rPPG)
+    and audio-visual phoneme-viseme biomechanical kinematics (File upload).
+    """
+    allowed_extensions = {".mp4", ".webm", ".avi", ".mov", ".mkv"}
+    file_ext = Path(file.filename).suffix.lower()
+
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": f"Unsupported format: {file_ext}. Allowed: {allowed_extensions}"}
+        )
+
+    temp_path = None
+    try:
+        content = await file.read()
+        max_bytes = 50 * 1024 * 1024
+        if len(content) > max_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail={"status": "error", "message": f"Video exceeds max size of {max_bytes // (1024*1024)}MB"}
+            )
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+            temp_file.write(content)
+            temp_path = temp_file.name
+
+        from core.video.pipeline import get_video_pipeline
+        vpipe = get_video_pipeline()
+        verdict = vpipe.analyze_video(temp_path)
+
+        return VideoDetectionResponse(
+            status="success",
+            classification=verdict.verdict,
+            confidenceScore=round(
+                verdict.overall_ai_probability if verdict.verdict == "AI_GENERATED"
+                else 1.0 - verdict.overall_ai_probability if verdict.verdict == "HUMAN"
+                else 0.5,
+                2
+            ),
+            confidence=verdict.confidence,
+            explanation=verdict.explanation,
+            fps=verdict.fps,
+            durationSeconds=verdict.duration_seconds,
+            totalFramesAnalyzed=verdict.total_frames,
+            hasBiologicalPulse=verdict.rppg_results.get("has_pulse", False),
+            detectedBpm=verdict.rppg_results.get("bpm"),
+            pulseSnr=verdict.rppg_results.get("pulse_snr", 0.0),
+            biomechanicalViolations=verdict.lip_sync_results.get("biomechanical_violations", 0),
+            bvpChartBase64=verdict.bvp_chart_b64,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error processing video: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "error", "message": f"Error processing video: {str(e)}"}
+        )
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
 
 
 if __name__ == "__main__":
