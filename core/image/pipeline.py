@@ -135,7 +135,7 @@ class ImageDetectionPipeline:
         """Run all analyzers in parallel using ThreadPoolExecutor."""
         results: List[AnalyzerResult] = []
 
-        with ThreadPoolExecutor(max_workers=min(len(analyzers), 8)) as executor:
+        with ThreadPoolExecutor(max_workers=min(len(analyzers), 4)) as executor:
             future_to_analyzer = {
                 executor.submit(analyzer.analyze, image_data): analyzer
                 for analyzer in analyzers
@@ -214,7 +214,7 @@ class ImageDetectionPipeline:
             "mode": mode,
         })
 
-        with ThreadPoolExecutor(max_workers=min(total, 8)) as executor:
+        with ThreadPoolExecutor(max_workers=min(total, 4)) as executor:
             future_to_analyzer = {
                 executor.submit(analyzer.analyze, image_data): analyzer
                 for analyzer in analyzers_to_run

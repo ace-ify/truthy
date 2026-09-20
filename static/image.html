@@ -34,7 +34,6 @@
   <div class="fixed inset-0 z-0 pointer-events-none">
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-500/10 rounded-full blur-[140px]"></div>
     <div class="absolute bottom-0 right-0 w-[600px] h-[400px] bg-purple-500/10 rounded-full blur-[120px]"></div>
-    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-15 brightness-100 contrast-150 mix-blend-soft-light"></div>
   </div>
 
   <!-- Shared Global Navigation Bar -->
@@ -239,11 +238,19 @@
           body: formData,
         });
 
-        const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.detail?.message || data.message || 'Analysis failed');
+          let errorMsg = `Server error (${response.status})`;
+          try {
+            const data = await response.json();
+            errorMsg = data.detail?.message || data.message || errorMsg;
+          } catch (_) {
+            if (response.status === 502 || response.status === 504) {
+              errorMsg = 'Server memory limit reached or request timed out. Please try Quick Mode or smaller images.';
+            }
+          }
+          throw new Error(errorMsg);
         }
-        return data;
+        return await response.json();
       }
     };
 
@@ -397,8 +404,16 @@
         });
 
         if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.detail?.message || err.message || 'Analysis failed');
+          let errorMsg = `Server error (${response.status})`;
+          try {
+            const err = await response.json();
+            errorMsg = err.detail?.message || err.message || errorMsg;
+          } catch (_) {
+            if (response.status === 502 || response.status === 504) {
+              errorMsg = 'Server memory limit reached or request timed out. Please try Quick Mode or smaller images.';
+            }
+          }
+          throw new Error(errorMsg);
         }
 
         const reader = response.body.getReader();
