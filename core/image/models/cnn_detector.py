@@ -53,39 +53,66 @@ class CNNDetector(BaseAnalyzer):
             import torch
 
             pil = image_data.pil_image
-            face_score = self._run_model(pil, self.face_proc, self.face_model)
-            ai_score = self._run_model(pil, self.ai_proc, self.ai_model)
+
+            # Run whichever models are available
+            face_score = (
+                self._run_model(pil, self.face_proc, self.face_model)
+                if self.face_model is not None
+                else None
+            )
+            ai_score = (
+                self._run_model(pil, self.ai_proc, self.ai_model)
+                if self.ai_model is not None
+                else None
+            )
 
             # --- Combination logic ---
-            # Both models agree AI → very strong signal
-            if face_score > 0.5 and ai_score > 0.5:
-                signal_score = 0.5 * face_score + 0.5 * ai_score
-                confidence = 0.90
-                method = "both_ai"
-                reasoning = f"Both CNNs agree: AI-generated (face={face_score:.0%}, ai={ai_score:.0%})"
+            if face_score is not None and ai_score is not None:
+                # Both models agree AI → very strong signal
+                if face_score > 0.5 and ai_score > 0.5:
+                    signal_score = 0.5 * face_score + 0.5 * ai_score
+                    confidence = 0.90
+                    method = "both_ai"
+                    reasoning = f"Both CNNs agree: AI-generated (face={face_score:.0%}, ai={ai_score:.0%})"
 
-            # Both models agree Real → strong real signal
-            elif face_score < 0.1 and ai_score < 0.5:
-                signal_score = 0.5 * face_score + 0.5 * ai_score
-                confidence = 0.85
-                method = "both_real"
-                reasoning = f"Both CNNs agree: human-created (face={face_score:.0%}, ai={ai_score:.0%})"
+                # Both models agree Real → strong real signal
+                elif face_score < 0.1 and ai_score < 0.5:
+                    signal_score = 0.5 * face_score + 0.5 * ai_score
+                    confidence = 0.85
+                    method = "both_real"
+                    reasoning = f"Both CNNs agree: human-created (face={face_score:.0%}, ai={ai_score:.0%})"
 
-            # Face model says Real but AI model says AI → DISAGREEMENT
-            # This is the critical case: could be a real photo (face model right)
-            # or an AI image (AI model right). Mark for judge tiebreaker.
-            elif face_score < 0.1 and ai_score > 0.5:
-                signal_score = 0.50  # Neutral — let the judge decide
-                confidence = 0.40   # Low confidence
-                method = "cnn_disagree"
-                reasoning = f"CNN models disagree: face={face_score:.0%} real, ai={ai_score:.0%} AI — needs tiebreaker"
+                # Face model says Real but AI model says AI → DISAGREEMENT
+                elif face_score < 0.1 and ai_score > 0.5:
+                    signal_score = 0.50  # Neutral — let the judge decide
+                    confidence = 0.40   # Low confidence
+                    method = "cnn_disagree"
+                    reasoning = f"CNN models disagree: face={face_score:.0%} real, ai={ai_score:.0%} AI — needs tiebreaker"
 
-            # Face model uncertain → don't trust AI model's false-positive-prone signal
+                else:
+                    signal_score = face_score
+                    confidence = 0.35
+                    method = "uncertain"
+                    reasoning = f"CNN uncertain (face={face_score:.0%}, ai={ai_score:.0%}) — deferring to other analyzers"
+
+            elif ai_score is not None:
+                # Ateeqq is loaded
+                signal_score = ai_score
+                confidence = 0.85 if (ai_score > 0.8 or ai_score < 0.2) else 0.50
+                method = "ai_model_only"
+                status_str = "AI-generated" if ai_score > 0.5 else "human-created"
+                reasoning = f"Vision Transformer detection: {status_str} ({ai_score:.0%} AI probability)"
+                face_score = 0.5
+            elif face_score is not None:
+                # Face model only
+                signal_score = face_score
+                confidence = 0.80 if face_score < 0.1 else 0.40
+                method = "face_model_only"
+                status_str = "human-created" if face_score < 0.5 else "deepfake/AI"
+                reasoning = f"Face model detection: {status_str} ({face_score:.0%} deepfake probability)"
+                ai_score = 0.5
             else:
-                signal_score = face_score  # Use face score only (0.1-0.5 range)
-                confidence = 0.35
-                method = "uncertain"
-                reasoning = f"CNN uncertain (face={face_score:.0%}, ai={ai_score:.0%}) — deferring to other analyzers"
+                return AnalyzerResult.failed(self.name, self.display_name, "No CNN/ViT models loaded")
 
             signal_score = float(np.clip(signal_score, 0.0, 1.0))
 
@@ -130,17 +157,30 @@ class CNNDetector(BaseAnalyzer):
         import gc
 
         gc.collect()
+        try:
+            from transformers import ViTImageProcessorPil as ImageProc
+        except ImportError:
+            from transformers import AutoImageProcessor as ImageProc
+
         logger.info(f"Loading face model: {FACE_MODEL}")
-        self.face_proc = AutoImageProcessor.from_pretrained(FACE_MODEL)
-        self.face_model = AutoModelForImageClassification.from_pretrained(
-            FACE_MODEL, low_cpu_mem_usage=True
-        )
-        self.face_model.eval()
+        try:
+            self.face_proc = ImageProc.from_pretrained(FACE_MODEL)
+            self.face_model = AutoModelForImageClassification.from_pretrained(
+                FACE_MODEL, low_cpu_mem_usage=True
+            )
+            self.face_model.eval()
+        except Exception as e:
+            logger.warning(f"Failed to load face model {FACE_MODEL}: {e}")
+            self.face_model = None
 
         logger.info(f"Loading AI model: {AI_MODEL}")
-        self.ai_proc = AutoImageProcessor.from_pretrained(AI_MODEL)
-        self.ai_model = AutoModelForImageClassification.from_pretrained(
-            AI_MODEL, low_cpu_mem_usage=True
-        )
-        self.ai_model.eval()
+        try:
+            self.ai_proc = ImageProc.from_pretrained(AI_MODEL)
+            self.ai_model = AutoModelForImageClassification.from_pretrained(
+                AI_MODEL, low_cpu_mem_usage=True
+            )
+            self.ai_model.eval()
+        except Exception as e:
+            logger.warning(f"Failed to load AI model {AI_MODEL}: {e}")
+            self.ai_model = None
         gc.collect()
