@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>Truthy — Round 1 Submission</title>
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root{--bg:#0b0e14;--panel:#11151d;--panel2:#0e121a;--bd:#232a36;--tx:#e5e7eb;--mut:#9ca3af;--mut2:#6b7280;--br:#3b82f6;--br2:#6366f1;--hi:#ef4444;--me:#f59e0b;--lo:#22c55e;}
+html{font-family:'Segoe UI',Inter,system-ui,sans-serif;}
+.page{width:1280px;height:720px;background:var(--bg);color:var(--tx);position:relative;overflow:hidden;page-break-after:always;padding:56px 64px;}
+.page:last-child{page-break-after:auto;}
+.glow{position:absolute;top:-160px;right:-120px;width:640px;height:420px;border-radius:50%;background:rgba(59,130,246,.13);filter:blur(150px);pointer-events:none;}
+.glow2{position:absolute;bottom:-160px;left:-100px;width:520px;height:360px;border-radius:50%;background:rgba(99,102,241,.12);filter:blur(150px);}
+.kick{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--br);font-weight:700;}
+h1{font-family:Oswald,'Segoe UI',sans-serif;font-size:64px;font-weight:700;line-height:1.02;margin:14px 0;letter-spacing:.01em;}
+h2{font-family:Oswald,'Segoe UI',sans-serif;font-size:40px;font-weight:600;margin-bottom:6px;}
+.lead{font-size:22px;color:var(--mut);max-width:920px;line-height:1.5;}
+.foot{position:absolute;bottom:26px;left:64px;right:64px;display:flex;justify-content:space-between;font-size:13px;color:var(--mut2);border-top:1px solid var(--bd);padding-top:12px;}
+.tag{display:inline-block;font-size:13px;color:var(--mut);border:1px solid var(--bd);border-radius:999px;padding:5px 14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:24px;}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:22px;}
+.card h3{font-size:19px;margin-bottom:8px;color:#fff;}
+.card p{font-size:15.5px;color:var(--mut);line-height:1.5;}
+.big{font-size:52px;font-weight:800;font-family:Oswald;}
+.hi{color:var(--hi);}.me{color:var(--me);}.lo{color:var(--lo);}.brc{color:var(--br);}
+ul.clean{list-style:none;margin-top:14px;}
+ul.clean li{font-size:17px;color:var(--tx);padding:9px 0 9px 26px;position:relative;line-height:1.4;}
+ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--br);}
+.shot{border:1px solid var(--bd);border-radius:12px;max-height:540px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.center{display:flex;align-items:center;justify-content:center;gap:36px;}
+.pageno{position:absolute;bottom:26px;right:64px;font-size:13px;color:var(--mut2);}
+.title-wrap{height:100%;display:flex;flex-direction:column;justify-content:center;}
+.pill-row{display:flex;gap:12px;margin-top:26px;}
+.flow{display:flex;align-items:stretch;gap:0;margin-top:20px;}
+.node{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;font-size:14px;flex:1;text-align:center;}
+.node b{display:block;color:#fff;font-size:15px;margin-bottom:3px;}
+.node small{color:var(--mut);font-size:12.5px;}
+.arrow{display:flex;align-items:center;color:var(--br);font-size:22px;padding:0 8px;}
+.prim{border-color:rgba(59,130,246,.5);}
+.supp{border-color:var(--bd);opacity:.9;}
+.note{font-size:13.5px;color:var(--mut2);margin-top:10px;}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;margin-top:8px;}
+.kv .k{color:var(--mut);}
+</style></head>
+<body>
+
+<!-- SLIDE 1 — TITLE -->
+<section class="page"><div class="glow"></div><div class="glow2"></div>
+  <div class="title-wrap">
+    <div class="kick">Amazon AI Cyber Security Hackathon · Track 3</div>
+    <h1>Truthy<br><span style="font-size:44px;color:var(--mut);font-weight:600">Verify before you pay.</span></h1>
+    <p class="lead">A multimodal verifier for financial communications: drop in a suspicious voice note,
+      video clip, or payment screenshot and get a plain-language verdict, the evidence behind it, and a
+      safe next step — with an auditable case record for review.</p>
+    <div class="pill-row">
+      <span class="tag">Deepfake detection for financial comms</span>
+      <span class="tag">Model-backed + calibrated</span>
+      <span class="tag">Human-in-the-loop</span>
+    </div>
+  </div>
+  <div class="foot"><span>Team __________ · Round 1 submission</span><span>Truthy</span></div>
+</section>
+
+<!-- SLIDE 2 — PROBLEM / USER -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">The harm</div>
+  <h2>The most expensive second in Indian digital finance</h2>
+  <p class="lead">A person is about to approve a UPI transfer or wire. Then a message arrives that
+    weaponises trust — and AI has made all three forms cheap to fake.</p>
+  <div class="grid3">
+    <div class="card"><h3>🎙️ Cloned-voice orders</h3><p>A WhatsApp voice note in the "boss's" or a
+      relative's voice: <i>"transfer now, I'll explain later."</i> Seconds of audio clone a voice.</p></div>
+    <div class="card"><h3>🎬 Deepfake video calls</h3><p>A "relationship manager" or executive on a
+      video call authorising a payout — face and voice synthesised.</p></div>
+    <div class="card"><h3>🖼️ Forged proof</h3><p>Fake payment-success screenshots, doctored bank SMS,
+      AI-generated KYC selfies used to unlock a release of funds.</p></div>
+  </div>
+  <ul class="clean">
+    <li><b>Primary user:</b> the person/agent at the payment decision — retail UPI user, SME accountant, or bank ops reviewer.</li>
+    <li><b>Bounded moment:</b> pre-payment verification. Not "scan the internet" — one message, one decision, one safe answer.</li>
+  </ul>
+  <div class="pageno">2</div>
+</section>
+
+<!-- SLIDE 3 — BEFORE / AFTER -->
+<section class="page"><div class="glow2"></div>
+  <div class="kick">Value</div>
+  <h2>From "panic and pay" to "check, then act"</h2>
+  <div class="grid2" style="margin-top:30px">
+    <div class="card" style="border-color:rgba(239,68,68,.4)">
+      <h3 class="hi">Today</h3>
+      <ul class="clean">
+        <li>Urgent message → pressure → pay first, doubt later.</li>
+        <li>No fast way to check a voice note or screenshot.</li>
+        <li>A raw "92% fake" score means nothing to a scared user.</li>
+        <li>No record, no escalation, no second opinion.</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(34,197,94,.4)">
+      <h3 class="lo">With Truthy</h3>
+      <ul class="clean">
+        <li>Drop the file → verdict in seconds.</li>
+        <li>Plain verdict + <b>"do not act, confirm on a known number."</b></li>
+        <li>Evidence + provenance you can show your bank.</li>
+        <li>Auto-escalation to a human when the model isn't sure.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Differentiation: not a generic "AI detector score" — a <b>decision + evidence + safe action + case record</b> for one high-stakes moment.</p>
+  <div class="pageno">3</div>
+</section>
+
+<!-- SLIDE 4 — PRODUCT WALKTHROUGH -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">The product</div>
+  <h2>One report a non-technical person can act on</h2>
+  <div class="center" style="margin-top:10px">
+    <img class="shot" src="assets/truthy-report-ai-image.png" style="max-height:560px">
+    <div style="max-width:440px">
+      <ul class="clean">
+        <li><b>Verdict + risk</b> with icon, word & colour (never colour alone).</li>
+        <li><b>"What you should do"</b> — the safe action, in plain language.</li>
+        <li><b>Primary vs supporting</b> evidence, clearly separated.</li>
+        <li><b>Provenance panel</b> (C2PA / EXIF) + illustrative heatmap.</li>
+        <li><b>Case ID + SHA-256</b>, exportable report, escalate button.</li>
+      </ul>
+      <p class="note">Real output on an AI-generated face: 88% AI, High confidence, model-backed + calibrated.</p>
+    </div>
+  </div>
+  <div class="pageno">4</div>
+</section>
+
+<!-- SLIDE 5 — DETECTION APPROACH (honesty tiering) -->
+<section class="page"><div class="glow2"></div>
+  <div class="kick">How detection works</div>
+  <h2>Honesty tiering: the model decides, heuristics only nudge</h2>
+  <div class="flow">
+    <div class="node prim"><b>Primary (model-backed)</b><small>Dual-CNN image · wav2vec2 voice-clone → calibrated P(AI)</small></div>
+    <div class="arrow">＋</div>
+    <div class="node supp"><b>Supporting (heuristic)</b><small>ELA, FFT, noise, phase, rPPG, lip-sync — bounded ±0.15 nudge</small></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>Calibrated verdict</b><small>AI / Human / <span class="me">Inconclusive → escalate</span></small></div>
+  </div>
+  <div class="grid3" style="margin-top:26px">
+    <div class="card"><h3 class="brc">The one rule</h3><p>A supporting signal can adjust confidence but
+      <b>can never flip a confident model verdict</b>. This kills the "10 shaky heuristics outvote the real model" failure.</p></div>
+    <div class="card"><h3 class="me">We don't guess</h3><p>When the primary model isn't confident, the
+      verdict is <b>Inconclusive</b> and the case routes to human review — no confident-looking wrong answer.</p></div>
+    <div class="card"><h3 class="lo">Calibrated, not vibes</h3><p>Platt scaling maps the model score to a
+      real probability; uncalibrated output is labelled and capped. Confidence means something.</p></div>
+  </div>
+  <p class="note">Replaces the old hand-tuned rule cascade. Primary models: <span style="font-family:monospace">dima806</span> + <span style="font-family:monospace">Ateeqq</span> (image), <span style="font-family:monospace">wav2vec2-xlsr</span> (voice).</p>
+  <div class="pageno">5</div>
+</section>
+
+<!-- SLIDE 6 — PROVENANCE & EVIDENCE -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">Strongest evidence & the record</div>
+  <h2>Provenance + a chain-of-custody case file</h2>
+  <div class="center" style="margin-top:8px">
+    <div style="max-width:520px">
+      <ul class="clean">
+        <li><b>C2PA / Content Credentials</b> verified cryptographically — a signed origin claim beats any pixel heuristic.</li>
+        <li><b>EXIF (piexif) + JPEG quant</b> — camera-capture chain vs AI-software marker vs messaging recompression.</li>
+        <li><b>Precedence rule:</b> verified provenance sets the headline; forgeable EXIF only fills an Inconclusive gap.</li>
+        <li><b>Every check → a case</b>: ID, SHA-256 of the media, verdict, timestamp — media itself never stored.</li>
+        <li><b>Exportable evidence report</b> to forward to a bank/fraud team.</li>
+      </ul>
+    </div>
+    <img class="shot" src="assets/truthy-evidence-report.png" style="max-height:560px">
+  </div>
+  <div class="pageno">6</div>
+</section>
+
+<!-- SLIDE 7 — DATA, VALIDATION, ASSUMPTIONS -->
+<section class="page"><div class="glow2"></div>
+  <div class="kick">Proof & honesty</div>
+  <h2>Real numbers, and what they do and don't mean</h2>
+  <div class="grid3" style="margin-top:20px">
+    <div class="card"><div class="big lo">87%</div><p>Leave-one-out accuracy of the calibrated primary on confident cases.</p></div>
+    <div class="card"><div class="big brc">0.047</div><p>Expected calibration error — confidence tracks reality (n=23).</p></div>
+    <div class="card"><div class="big me">62%</div><p>Of a hard mixed set routed to human review instead of guessed. <b>The escalation rate is the safety feature.</b></p></div>
+  </div>
+  <ul class="clean" style="margin-top:18px">
+    <li><b>Data:</b> synthetic/public/consented samples only (AI faces + real portraits, incl. WhatsApp-compressed).</li>
+    <li><b>Validation plan:</b> expand labelled sets per attack type; report ROC + calibration; red-team adversarial inputs.</li>
+    <li><b>Assumption stated:</b> n is small — this calibrates <i>confidence</i>, it is not a benchmark accuracy claim.</li>
+  </ul>
+  <div class="pageno">7</div>
+</section>
+
+<!-- SLIDE 8 — SAFETY & RESPONSIBLE AI -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">Safety, privacy & responsible AI</div>
+  <h2>Built so being wrong can't cause harm</h2>
+  <div class="center" style="margin-top:6px">
+    <div style="max-width:560px">
+      <ul class="clean">
+        <li><b>No auto-blocking / accusations</b> on a single weak signal — Truthy advises, the human acts.</li>
+        <li><b>Human review path</b> for every escalated / low-confidence case, gated by a reviewer key (fails closed).</li>
+        <li><b>Consent + purpose:</b> uploader confirms authorisation; enforced server-side.</li>
+        <li><b>Privacy:</b> media processed transiently and <b>never stored</b> — only metadata + a SHA-256 hash.</li>
+        <li><b>False-positive care:</b> WhatsApp recompression no longer forces "fake"; ambiguity → review.</li>
+        <li><b>Adversarial awareness:</b> heuristics can't drive the verdict, so poisoning them can't flip it; provenance forgery is capped to a nudge.</li>
+      </ul>
+    </div>
+    <img class="shot" src="assets/truthy-review-queue.png" style="max-height:520px">
+  </div>
+  <div class="pageno">8</div>
+</section>
+
+<!-- SLIDE 9 — ADOPTION & SCALE -->
+<section class="page"><div class="glow2"></div>
+  <div class="kick">Adoption, integration & scale</div>
+  <h2>A drop-in verification step, three ways to ship</h2>
+  <div class="grid3">
+    <div class="card"><h3>Consumer PWA</h3><p>Share-sheet target: forward a suspicious voice note/screenshot from WhatsApp → verdict. Zero install.</p></div>
+    <div class="card"><h3>Bank / wallet SDK</h3><p><span style="font-family:monospace">/api/verify</span> called in-app at the "confirm payment" step for flagged flows; verdict + case ID returned.</p></div>
+    <div class="card"><h3>PSP / ops console</h3><p>Fraud-ops review queue for escalations, with exportable evidence reports for dispute files.</p></div>
+  </div>
+  <div class="kv" style="margin-top:22px;max-width:1000px">
+    <div class="k">Operating owner</div><div>Bank/PSP fraud-risk team (queue) + platform trust team (thresholds, calibration refresh).</div>
+    <div class="k">Rollout</div><div>1) internal ops assist → 2) high-risk flows in-app → 3) consumer share-sheet.</div>
+    <div class="k">Latency / cost</div><div>Image ~2–8s CPU; single-worker to avoid model duplication; HF Inference API keeps audio model out of RAM; scale by replicas.</div>
+  </div>
+  <div class="pageno">9</div>
+</section>
+
+<!-- SLIDE 10 — 48H FINALE PLAN -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">Feasibility · 48-hour finale</div>
+  <h2>A narrow, demonstrable MVP — most of it already runs</h2>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card"><h3 class="lo">Already working (this submission)</h3>
+      <ul class="clean">
+        <li>Unified verify UI for image / voice / video.</li>
+        <li>Calibrated dual-CNN image + wav2vec2 voice-clone.</li>
+        <li>C2PA + EXIF provenance; case ledger; evidence report; review queue.</li>
+      </ul></div>
+    <div class="card"><h3 class="brc">48h build targets</h3>
+      <ul class="clean">
+        <li>Live demo: cloned-voice UPI note + forged screenshot + deepfake clip.</li>
+        <li>WhatsApp share-sheet PWA front-end.</li>
+        <li>Expand + re-fit calibration per attack type; publish ROC.</li>
+        <li>Reviewer analytics + webhook alert to a mock bank ops channel.</li>
+      </ul></div>
+  </div>
+  <p class="note">What we'll prove in 48h: end-to-end "suspicious message → verdict → evidence → escalation" on all three modalities, with honest calibrated confidence.</p>
+  <div class="foot"><span>Truthy — Verify before you pay</span><span>Deck 10/10 · Architecture follows</span></div>
+</section>
+
+<!-- ARCH 1 — END-TO-END DIAGRAM -->
+<section class="page" style="padding:30px 64px"><div class="glow"></div>
+  <div class="kick">Architecture · 1 of 3</div>
+  <h2 style="font-size:28px;margin-bottom:2px">End-to-end system</h2>
+  <div id="a1" style="margin-top:8px">
+  <style>#a1 .node{padding:9px 14px}#a1 .node small{font-size:11.5px;line-height:1.3}#a1 .node b{font-size:14px}.adn{text-align:center;color:var(--br);font-size:15px;margin:2px 0;}</style>
+    <div class="node" style="flex:none;background:var(--panel2)"><b>① Ingest — POST /api/verify</b><small>Voice note · video clip · image/screenshot · <b>consent required</b> · SHA-256 hashed at entry · temp file, deleted after</small></div>
+    <div class="adn">▼</div>
+    <div class="grid3" style="margin:0">
+      <div class="node prim"><b>Voice pipeline</b><small>librosa 16k → Silero VAD → <b>wav2vec2-xlsr</b> voice-clone (primary)</small></div>
+      <div class="node prim"><b>Image pipeline</b><small><b>dual-CNN</b> (primary) + 11 DSP forensics + attention heatmap (supporting)</small></div>
+      <div class="node prim"><b>Video pipeline</b><small>frames → rPPG + lip-sync (supporting) · audio → <b>wav2vec2</b> (primary)</small></div>
+    </div>
+    <div class="adn">▼</div>
+    <div class="grid2" style="margin:0">
+      <div class="node" style="background:var(--panel);border-color:rgba(59,130,246,.5)"><b>② Tiered fusion + calibration</b><small>Calibrated primary drives verdict · supporting ±0.15 nudge only · Platt scaling → P(AI) · uncertain → Inconclusive+escalate</small></div>
+      <div class="node" style="background:var(--panel);border-color:rgba(34,197,94,.4)"><b>③ Provenance</b><small>C2PA verify + EXIF (piexif) + JPEG quant · <b>verified provenance outranks pixels</b></small></div>
+    </div>
+    <div class="adn">▼</div>
+    <div class="node" style="flex:none;background:var(--panel2)"><b>④ Decision envelope</b><small>Verdict (AI / Human / Inconclusive) · risk (high/med/low) · calibrated confidence · <b>plain-language recommendation</b> · signals · provenance</small></div>
+    <div class="adn">▼</div>
+    <div class="grid3" style="margin:0">
+      <div class="node"><b>⑤ Case ledger (SQLite)</b><small>case ID · SHA-256 · verdict · review status — <b>media never stored</b></small></div>
+      <div class="node"><b>Evidence report</b><small>printable HTML → PDF · chain of custody</small></div>
+      <div class="node" style="border-color:rgba(245,158,11,.5)"><b>Human review</b><small>escalation queue · reviewer key · confirm/override</small></div>
+    </div>
+  </div>
+  <div class="pageno">Architecture 1/3</div>
+</section>
+
+<!-- ARCH 2 — COMPONENTS, INPUTS, STORAGE -->
+<section class="page"><div class="glow2"></div>
+  <div class="kick">Architecture · 2 of 3</div>
+  <h2 style="font-size:32px">Inputs, models, storage & interfaces</h2>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>Inputs, consent & provenance</h3>
+      <ul class="clean">
+        <li>Voice/video/image up to 20–50 MB; consent flag mandatory (UI + server).</li>
+        <li>Provenance inputs: C2PA manifest, EXIF (Make/Model/DateTime/GPS/lens), JPEG DQT.</li>
+        <li>SHA-256 computed at ingest as the evidentiary anchor.</li>
+      </ul></div>
+    <div class="card"><h3>Models & rules</h3>
+      <ul class="clean">
+        <li><b>Primary:</b> dima806 + Ateeqq (image), wav2vec2-xlsr (voice) — HF, pinned; CPU/INT8 or HF Inference API.</li>
+        <li><b>Calibrator:</b> Platt (scipy), persisted <span style="font-family:monospace">calibration.json</span>.</li>
+        <li><b>Supporting:</b> numpy/scipy DSP + rPPG + lip-sync (bounded influence).</li>
+      </ul></div>
+    <div class="card"><h3>Storage & data boundaries</h3>
+      <ul class="clean">
+        <li>SQLite case ledger (metadata + hash + verdict + review state).</li>
+        <li><b>No media at rest</b>; temp files unlinked in a finally block.</li>
+        <li>Calibration + model weights are the only persisted model artifacts.</li>
+      </ul></div>
+    <div class="card"><h3>Interfaces & outputs</h3>
+      <ul class="clean">
+        <li>REST: <span style="font-family:monospace">/api/verify</span>, case/report/escalate/review; SSE for live image.</li>
+        <li>Outputs: JSON report envelope + printable HTML evidence report.</li>
+        <li>UI: unified verify page + analyst review queue.</li>
+      </ul></div>
+  </div>
+  <div class="pageno">Architecture 2/3</div>
+</section>
+
+<!-- ARCH 3 — FLOW, SECURITY, PERF -->
+<section class="page"><div class="glow"></div>
+  <div class="kick">Architecture · 3 of 3</div>
+  <h2 style="font-size:32px">Decision flow, safeguards & validation</h2>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>Decision & escalation flow</h3>
+      <ul class="clean">
+        <li>Confident primary → calibrated verdict + risk + recommendation.</li>
+        <li>Uncertain / conflicting / no-primary → <b>Inconclusive → auto-queue for human review.</b></li>
+        <li>Reviewer confirms or overrides with a note; decision stored on the case.</li>
+      </ul></div>
+    <div class="card"><h3>Security & privacy</h3>
+      <ul class="clean">
+        <li>Review endpoints require <span style="font-family:monospace">REVIEWER_KEY</span> (no same-origin bypass), fail closed.</li>
+        <li>Transient media, hash-only retention; consent-gated ingest.</li>
+        <li>Tighten CORS on mutations; rate-limited public endpoints.</li>
+      </ul></div>
+    <div class="card"><h3>Adversarial risk</h3>
+      <ul class="clean">
+        <li>Heuristics can't drive the verdict → poisoning them can't flip it.</li>
+        <li>Provenance forgery capped to a nudge; only <b>verified</b> C2PA overrides.</li>
+        <li>Unknown/ambiguous defaults to escalation, not a confident wrong call.</li>
+      </ul></div>
+    <div class="card"><h3>Performance & validation</h3>
+      <ul class="clean">
+        <li>Image ~2–8s CPU; thread-pool capped; single worker (no model duplication).</li>
+        <li>Validation: LOO accuracy + ECE today; ROC + per-attack sets next.</li>
+        <li>Calibration refresh as labelled data grows; disclosed sample size.</li>
+      </ul></div>
+  </div>
+  <div class="foot"><span>Truthy — Verify before you pay</span><span>Synthetic/public/consented data only · decision-support, not legal proof</span></div>
+</section>
+
+</body></html>
+
+
+
+
+
