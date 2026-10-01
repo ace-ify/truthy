@@ -121,6 +121,9 @@ class ImageDetectionPipeline:
         # Feed to judge
         verdict = self.judge.evaluate(results, mode=judge_mode)
 
+        # Attach provenance (C2PA/EXIF/quant) and apply the precedence rule
+        self._attach_provenance(verdict, image_data)
+
         total_time = int((time.perf_counter() - start_time) * 1000)
         logger.info(
             f"Pipeline complete in {total_time}ms: {verdict.verdict} "
@@ -128,6 +131,18 @@ class ImageDetectionPipeline:
         )
 
         return verdict
+
+    def _attach_provenance(self, verdict, image_data: ImageData) -> None:
+        """Run provenance (C2PA/EXIF/quant), attach the panel, apply the precedence rule."""
+        try:
+            from core.provenance.provenance import analyze_provenance, apply_precedence
+            prov = analyze_provenance(
+                image_data.raw_bytes, image_data.pil_image, image_data.original_format
+            )
+            verdict.provenance = prov
+            apply_precedence(verdict, prov)
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Provenance step failed: {e}")
 
     def _run_parallel(
         self, analyzers: List[BaseAnalyzer], image_data: ImageData
@@ -231,6 +246,7 @@ class ImageDetectionPipeline:
                             "type": "analyzer_result",
                             "analyzer": result.analyzer_name,
                             "display_name": result.display_name,
+                            "tier": getattr(result, "tier", "supporting"),
                             "score": round(result.signal_score, 3),
                             "confidence": round(result.confidence, 3),
                             "weight": round(result.weight, 2),
@@ -246,6 +262,7 @@ class ImageDetectionPipeline:
                             "type": "analyzer_result",
                             "analyzer": analyzer.name,
                             "display_name": analyzer.display_name,
+                            "tier": getattr(analyzer, "tier", "supporting"),
                             "score": 0.5,
                             "confidence": 0.0,
                             "weight": 0.0,
@@ -264,6 +281,7 @@ class ImageDetectionPipeline:
 
         # Feed to judge and yield final verdict
         verdict = self.judge.evaluate(results, mode=judge_mode)
+        self._attach_provenance(verdict, image_data)
         total_time = int((time.perf_counter() - start_time) * 1000)
 
         yield json.dumps({
@@ -274,6 +292,10 @@ class ImageDetectionPipeline:
             "explanation": verdict.explanation,
             "generator_guess": verdict.generator_guess,
             "heatmap_b64": verdict.heatmap_b64,
+            "provenance": verdict.provenance,
+            "calibrated": verdict.calibrated,
+            "model_backed": verdict.model_backed,
+            "escalate": verdict.escalate,
             "total_time_ms": total_time,
         })
 
