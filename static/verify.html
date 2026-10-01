@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truthy - Verify before you pay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .font-oswald { font-family: 'Oswald', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    @keyframes fadeInUp { 0%{opacity:0;transform:translateY(20px);} 100%{opacity:1;transform:translateY(0);} }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes barGrow { 0%{width:0;} 100%{width:var(--target);} }
+    .animate-fade-in { animation: fadeInUp .5s ease-out both; }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .sigbar { animation: barGrow .8s ease-out both; }
+    .drop-active { border-color:#3b82f6 !important; background:rgba(59,130,246,.05) !important; }
+    .glass { background:rgba(255,255,255,.03); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.08); }
+    details>summary{list-style:none;cursor:pointer;} details>summary::-webkit-details-marker{display:none;}
+  </style>
+</head>
+<body class="antialiased bg-[#000000] text-white min-h-screen selection:bg-blue-500 selection:text-white">
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[400px] bg-purple-500/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Nav (matches landing) -->
+  <nav class="flex z-50 w-full pt-6 pr-4 pl-4 fixed top-0 left-0 right-0 items-center justify-center">
+    <div class="flex bg-black/90 backdrop-blur-md w-full max-w-5xl border-white/10 border rounded-full pt-4 pr-6 pb-4 pl-8 relative shadow-2xl items-center justify-between">
+      <a href="/" class="inline-flex items-center gap-3">
+        <img src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65" alt="Truthy" class="h-[21px]">
+        <span class="text-[11px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10 hidden sm:inline-block">Verify</span>
+      </a>
+      <div class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+        <a href="/audio" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors">Voice</a>
+        <a href="/image" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors">Image</a>
+        <a href="/video" class="text-[13px] font-medium text-gray-400 hover:text-white px-4 py-1.5 rounded-full transition-colors">Video</a>
+        <a href="/verify" class="text-[13px] font-medium text-white bg-white/15 px-4 py-1.5 rounded-full transition-colors shadow-sm">Verify</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/review" class="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">Review queue &rarr;</a>
+      </div>
+    </div>
+  </nav>
+  <!-- APP -->
+  <main class="relative z-10 max-w-3xl mx-auto px-4 pt-32 pb-24">
+    <header class="text-center mb-10 animate-fade-in">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-400 text-xs font-medium mb-5">
+        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+        Verify before you pay
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-light mb-3 font-oswald tracking-tight">Is this message real?</h1>
+      <p class="text-gray-400 text-base max-w-xl mx-auto leading-relaxed">
+        Drop a suspicious voice note, video clip, or payment screenshot. Get a plain verdict, the
+        evidence behind it, a safe next step, and an auditable case record.
+      </p>
+    </header>
+
+    <!-- Upload -->
+    <div id="upload" class="glass rounded-3xl p-7 animate-fade-in">
+      <!-- media tabs -->
+      <div class="grid grid-cols-3 gap-2 mb-6 bg-white/5 rounded-2xl p-1.5">
+        <button data-type="image" class="tab flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="image" class="w-5 h-5"></i>Screenshot / image</button>
+        <button data-type="voice" class="tab flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="mic" class="w-5 h-5"></i>Voice note</button>
+        <button data-type="video" class="tab flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="video" class="w-5 h-5"></i>Video clip</button>
+      </div>
+
+      <button type="button" id="drop" class="relative w-full border-2 border-dashed border-white/15 hover:border-blue-500/50 rounded-2xl p-10 text-center transition-all">
+        <div id="drop-default" class="space-y-3">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-white/5 flex items-center justify-center"><i data-lucide="upload-cloud" class="w-6 h-6 text-gray-400"></i></div>
+          <p class="text-gray-200 font-medium text-lg">Drop a file here, or click to browse</p>
+          <p id="drop-hint" class="text-xs text-gray-500">Processed then deleted. We never store the media itself.</p>
+        </div>
+        <div id="drop-preview" class="hidden flex items-center gap-4 text-left">
+          <img id="preview-img" class="w-16 h-16 rounded-xl object-cover border border-white/10 hidden" alt="">
+          <div class="w-12 h-12 rounded-xl bg-white/5 hidden items-center justify-center" id="preview-icon"><i data-lucide="file" class="w-5 h-5 text-gray-300"></i></div>
+          <div><p id="preview-name" class="font-medium text-white break-all"></p><p id="preview-size" class="text-sm text-gray-500 mt-0.5"></p></div>
+        </div>
+      </button>
+      <input type="file" id="file" class="hidden" aria-label="Choose a file">
+
+      <div id="mode-field" class="mt-4">
+        <label class="block text-sm text-gray-400 mb-2">Analysis depth</label>
+        <select id="mode" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50">
+          <option value="quick">Quick (~3s)</option><option value="standard" selected>Standard (~8s)</option><option value="thorough">Thorough (~15s)</option>
+        </select>
+      </div>
+      <div id="lang-field" class="mt-4 hidden">
+        <label class="block text-sm text-gray-400 mb-2">Spoken language</label>
+        <select id="lang" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50">
+          <option>English</option><option>Hindi</option><option>Tamil</option><option>Telugu</option><option>Malayalam</option>
+        </select>
+      </div>
+
+      <label class="flex gap-3 mt-5 text-sm text-gray-400">
+        <input type="checkbox" id="consent" class="mt-1 w-4 h-4 accent-blue-500 flex-shrink-0">
+        <span>I'm authorized to analyze this media. It is processed transiently (not stored), the result is
+          decision-support (not legal proof), and I'll verify high-value requests through a trusted channel.</span>
+      </label>
+
+      <button id="go" disabled class="w-full mt-6 py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all">
+        <i data-lucide="shield-check" class="w-5 h-5"></i><span>Verify this file</span>
+      </button>
+      <p id="err" class="hidden mt-3 text-sm text-red-400 text-center"></p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="hidden glass rounded-3xl p-8 mt-6 text-center">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin"></div>
+      <h3 class="text-lg font-semibold mb-1" id="loading-title">Analyzing…</h3>
+      <p id="loading-sub" class="text-gray-400 text-sm"></p>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="hidden mt-6 space-y-5" tabindex="-1"></div>
+  </main>
+  <script src="/static/js/verify.js"></script>
+</body>
+</html>
+

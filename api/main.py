@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
 from fastapi.exceptions import RequestValidationError
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -21,9 +21,12 @@ import torch
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from config import SAMPLE_RATE, CHUNK_DURATION, UPLOAD_DIR, PREWARM_IMAGE_MODELS
+from config import SAMPLE_RATE, CHUNK_DURATION, UPLOAD_DIR, PREWARM_IMAGE_MODELS, REVIEWER_KEY
 from core.audio_processor import process_uploaded_file, split_into_chunks
 from core.aggregator import aggregate_results
+from core.report import envelope_from_image, envelope_from_video, envelope_from_voice
+from core.report_html import render_report_html
+from core.governance import store as case_store
 from api.models import (
     AnalysisResponse, ErrorResponse, HealthResponse,
     VoiceDetectionRequest, VoiceDetectionResponse, VoiceDetectionErrorResponse,
@@ -201,34 +204,25 @@ def verify_api_key(
 
 
 def generate_explanation(ai_prob: float, classification: str, language: str) -> str:
+    """Plain, honest, pay-context explanation. We report the model's probability and a
+    safe next action — we do NOT fabricate specific acoustic 'artifacts' we didn't measure."""
     if classification == "AI_GENERATED":
-        if ai_prob > 0.9:
-            return f"Strong synthetic voice patterns detected. Audio shows clear signs of AI generation with unnatural pitch consistency and robotic speech artifacts in {language}."
-        elif ai_prob > 0.75:
-            return f"High probability of AI-generated speech. Detected irregular prosody and mechanical intonation patterns typical of synthetic voices in {language}."
-        else:
-            return f"Moderate indicators of AI generation detected. Some unnatural speech patterns and timing irregularities found in the {language} audio sample."
-    else:
-        if ai_prob < 0.2:
-            return f"Audio exhibits natural human speech characteristics. Normal breathing patterns, natural pitch variations, and organic voice modulation detected in {language}."
-        elif ai_prob < 0.35:
-            return f"Strong indicators of authentic human voice. Natural prosody and speech patterns consistent with genuine {language} speech."
-        else:
-            return f"Audio appears to be human speech with natural voice characteristics typical of {language} speakers."
+        return (
+            f"This {language} voice sample is likely AI-generated or cloned "
+            f"({ai_prob:.0%} from the voice model). Do not act on any payment or account "
+            f"instructions in it — confirm with the person on a known, trusted number first."
+        )
+    return (
+        f"This {language} voice sample is likely a real human voice "
+        f"({1 - ai_prob:.0%} from the voice model). No strong signs of AI cloning were found, "
+        f"but for high-value or urgent money requests, still verify through a trusted channel."
+    )
 
 
 @app.get("/")
 @app.get("/audio")
 async def root():
     return FileResponse(str(STATIC_DIR / "index.html"))
-
-
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    favicon_path = STATIC_DIR / "favicon.ico"
-    if favicon_path.exists():
-        return FileResponse(str(favicon_path))
-    return Response(status_code=204)
 
 
 @app.get("/image")
@@ -239,6 +233,24 @@ async def image_page():
 @app.get("/video")
 async def video_page():
     return FileResponse(str(STATIC_DIR / "video.html"))
+
+
+@app.get("/verify")
+async def verify_page():
+    return FileResponse(str(STATIC_DIR / "verify.html"))
+
+
+@app.get("/review")
+async def review_page():
+    return FileResponse(str(STATIC_DIR / "review.html"))
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = STATIC_DIR / "favicon.ico"
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path))
+    return Response(status_code=204)
 
 
 @app.get("/api/health", response_model=HealthResponse)
@@ -877,6 +889,184 @@ async def video_analyze(
     finally:
         if temp_path and os.path.exists(temp_path):
             os.unlink(temp_path)
+
+
+from fastapi import Form
+
+
+def verify_reviewer_key(x_reviewer_key: str = Header(None)) -> str:
+    """Gate the human-review queue and case mutations. Fails CLOSED: if no REVIEWER_KEY is
+    configured, these endpoints are disabled. Does NOT accept the spoofable same-origin bypass."""
+    if not REVIEWER_KEY:
+        raise HTTPException(
+            status_code=403,
+            detail={"status": "error", "message": "Review queue is disabled (set REVIEWER_KEY)."},
+        )
+    if x_reviewer_key != REVIEWER_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={"status": "error", "message": "Missing or invalid x-reviewer-key."},
+        )
+    return "reviewer"
+
+
+_AUDIO_EXT = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".wma", ".aac"}
+_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif"}
+_VIDEO_EXT = {".mp4", ".webm", ".avi", ".mov", ".mkv"}
+
+
+def _detect_media_type(ext: str) -> str:
+    if ext in _AUDIO_EXT:
+        return "voice"
+    if ext in _IMAGE_EXT:
+        return "image"
+    if ext in _VIDEO_EXT:
+        return "video"
+    return "unknown"
+
+
+@app.post("/api/verify")
+async def verify(
+    request: Request,
+    file: UploadFile = File(...),
+    consent: str = Form("false"),
+    language: str = Form("English"),
+    mode: str = Form("standard"),
+):
+    """Unified 'verify before you pay' endpoint: accepts a voice note, video, or image,
+    returns ONE report envelope, and records an auditable case (verdict + SHA-256, not media)."""
+    # Consent gate (defense in depth beyond the UI checkbox).
+    if str(consent).lower() not in ("true", "1", "yes", "on"):
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": "Consent required: confirm you are authorized to analyze this media."},
+        )
+
+    ext = Path(file.filename or "").suffix.lower()
+    media_type = _detect_media_type(ext)
+    if media_type == "unknown":
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": f"Unsupported file type: {ext or 'unknown'}."},
+        )
+
+    content = await file.read()
+    if len(content) < 100:
+        raise HTTPException(status_code=400, detail={"status": "error", "message": "File too small or corrupt."})
+    max_bytes = (20 if media_type == "image" else 50) * 1024 * 1024
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail={"status": "error", "message": f"File too large. Max {max_bytes // (1024*1024)}MB for {media_type}."},
+        )
+
+    temp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tf:
+            tf.write(content)
+            temp_path = tf.name
+
+        if media_type == "image":
+            global image_pipeline
+            if image_pipeline is None:
+                from core.image.pipeline import get_pipeline
+                image_pipeline = get_pipeline()
+            verdict = image_pipeline.analyze_from_path(temp_path, mode=mode)
+            envelope = envelope_from_image(verdict, filename=file.filename)
+
+        elif media_type == "video":
+            from core.video.pipeline import get_video_pipeline
+            verdict = get_video_pipeline().analyze_video(temp_path)
+            envelope = envelope_from_video(verdict, filename=file.filename)
+
+        else:  # voice
+            vad, det = get_models()
+            audio, sr = process_uploaded_file(temp_path, remove_bg_noise=True)
+            chunks = split_into_chunks(audio, sr, CHUNK_DURATION)
+            vad_results = vad.process_chunks(chunks, sr)
+            detection_results = []
+            for i, (chunk, vr) in enumerate(zip(chunks, vad_results)):
+                if vr["has_speech"]:
+                    ai_prob, pred = det.predict(chunk, sr)
+                    detection_results.append({"chunk_index": i, "ai_probability": ai_prob, "prediction": pred})
+            if not detection_results:
+                # No speech -> don't guess.
+                from core.report import build_envelope
+                envelope = build_envelope(
+                    media_type="voice", verdict="INCONCLUSIVE", confidence="Low",
+                    ai_probability=0.5, explanation="No clear speech was found in this audio, so it can't be verified. Confirm the request through a trusted channel.",
+                    model_backed=False, escalate=True, filename=file.filename,
+                )
+            else:
+                result = aggregate_results(vad_results, detection_results, CHUNK_DURATION)
+                classification = "AI_GENERATED" if result.overall_ai_probability > 0.5 else "HUMAN"
+                explanation = generate_explanation(result.overall_ai_probability, classification, language)
+                envelope = envelope_from_voice(result, language, explanation, filename=file.filename)
+
+        # Persist an auditable case (metadata + SHA-256, never the media itself).
+        meta = case_store.record_case(envelope, content)
+        envelope.update(meta)  # caseId, sha256, createdAt, reviewStatus
+        envelope["status"] = "success"
+        return JSONResponse(content=envelope)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Verify failed: {e}")
+        raise HTTPException(status_code=500, detail={"status": "error", "message": f"Analysis failed: {str(e)}"})
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
+@app.get("/api/case/{case_id}")
+async def get_case_endpoint(case_id: str):
+    case = case_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    import json as _json
+    env = _json.loads(case.get("report_json") or "{}")
+    env.update({
+        "caseId": case["case_id"], "sha256": case["sha256"], "createdAt": case["created_at"],
+        "reviewStatus": case["review_status"], "reviewerDecision": case.get("reviewer_decision"),
+        "reviewerNote": case.get("reviewer_note"), "status": "success",
+    })
+    return JSONResponse(content=env)
+
+
+@app.get("/api/case/{case_id}/report", response_class=HTMLResponse)
+async def case_report_html(case_id: str):
+    case = case_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    return HTMLResponse(content=render_report_html(case))
+
+
+@app.post("/api/case/{case_id}/escalate")
+async def escalate_case_endpoint(case_id: str):
+    if not case_store.get_case(case_id):
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    case_store.escalate_case(case_id)
+    return {"status": "success", "caseId": case_id, "reviewStatus": "queued"}
+
+
+@app.get("/api/review")
+async def review_queue(reviewer: str = Depends(verify_reviewer_key)):
+    return {"status": "success", "cases": case_store.list_cases(review_status="queued")}
+
+
+@app.post("/api/case/{case_id}/review")
+async def review_case_endpoint(
+    case_id: str,
+    decision: str = Form(...),
+    note: str = Form(""),
+    reviewer: str = Depends(verify_reviewer_key),
+):
+    if decision not in ("confirm", "override_authentic", "override_fake"):
+        raise HTTPException(status_code=400, detail={"status": "error", "message": "Invalid decision"})
+    if not case_store.review_case(case_id, decision, note):
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    return {"status": "success", "caseId": case_id, "reviewStatus": "reviewed", "decision": decision}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truthy - Review queue</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    *{font-family:'Inter',sans-serif;} .font-oswald{font-family:'Oswald',sans-serif;}
+    ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+    @keyframes fadeInUp{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
+    .animate-fade-in{animation:fadeInUp .5s ease-out both;}
+    .glass{background:rgba(255,255,255,.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);}
+  </style>
+</head>
+<body class="antialiased bg-[#000000] text-white min-h-screen selection:bg-blue-500 selection:text-white">
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-500/10 rounded-full blur-[140px]"></div>
+  </div>
+  <nav class="flex z-50 w-full pt-6 pr-4 pl-4 fixed top-0 left-0 right-0 items-center justify-center">
+    <div class="flex bg-black/90 backdrop-blur-md w-full max-w-5xl border-white/10 border rounded-full pt-4 pr-6 pb-4 pl-8 relative shadow-2xl items-center justify-between">
+      <a href="/" class="inline-flex items-center gap-3">
+        <img src="https://see.fontimg.com/api/rf5/rv0aB/ZTRlNjgyYThiNTRjNDE1ZWFiYzliZmY5OGI5MDhhM2Yub3Rm/dHJ1dGh5/teknaf-regular.png?r=fs&h=81&w=1250&fg=FFFFFF&bg=000000&s=65" alt="Truthy" class="h-[21px]">
+        <span class="text-[11px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10 hidden sm:inline-block">Analyst</span>
+      </a>
+      <a href="/verify" class="text-xs text-gray-400 hover:text-white transition-colors">&larr; Back to Verify</a>
+    </div>
+  </nav>
+
+  <main class="relative z-10 max-w-3xl mx-auto px-4 pt-32 pb-24">
+    <header class="mb-8 animate-fade-in">
+      <h1 class="text-3xl sm:text-4xl font-light font-oswald tracking-tight">Human review queue</h1>
+      <p class="text-gray-400 mt-2 text-sm max-w-xl">Escalated and low-confidence cases land here for a human decision before any high-impact action.</p>
+    </header>
+
+    <div id="auth" class="glass rounded-3xl p-7 animate-fade-in">
+      <label class="block text-sm text-gray-400 mb-2">Reviewer key</label>
+      <input id="key" type="password" placeholder="x-reviewer-key" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50">
+      <button id="load" class="w-full mt-4 py-3.5 rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all">Load queue</button>
+      <p id="autherr" class="hidden mt-3 text-sm text-red-400"></p>
+      <p class="text-xs text-gray-600 mt-4">Set <code class="text-gray-400">REVIEWER_KEY</code> on the server to enable. The endpoint fails closed without it.</p>
+    </div>
+
+    <div id="queue" class="hidden mt-6 space-y-5"></div>
+  </main>
+  <script src="/static/js/review.js"></script>
+</body>
+</html>
