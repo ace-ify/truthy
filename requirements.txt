@@ -19,6 +19,11 @@ opencv-python-headless>=4.8.0
 scikit-image>=0.21.0
 piexif>=1.1.3
 
+# Provenance: C2PA / Content Credentials verification (Rust-backed wheels).
+# If the wheel is unavailable on the target platform, core/provenance/c2pa_verify.py
+# degrades gracefully to a byte-scan ("present but unverified") — it never hard-fails.
+c2pa-python>=0.37.0
+
 # Environment
 python-dotenv>=1.0.0
 

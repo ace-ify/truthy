@@ -49,3 +49,14 @@ htmlcov/
 # Cached model weights (not source code)
 /models/
 silero_vad.jit
+
+# Runtime governance ledger (do not commit)
+cases.db
+cases.db-wal
+cases.db-shm
+.venv/
+.playwright-mcp/
+
+# Generated deck PDF + preview renders (regenerate from submission/deck.html)
+submission/*.pdf
+submission/_preview*.png

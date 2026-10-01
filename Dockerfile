@@ -32,4 +32,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health')" || exit 1
 
 # Run the application
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# IMPORTANT: single worker (--workers 1). Each worker lazy-loads its OWN copy of the
+# wav2vec2 + dual-CNN models (~2GB). Multiple workers multiply RAM and re-trigger the
+# OOM/502 kills fixed in commit 5be1c88. Scale with replicas, not in-process workers.
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
