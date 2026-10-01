@@ -61,18 +61,6 @@ class RPPGDetector:
         # Robust skin/central capillary ROI fallback (central 50% region)
         return frame_bgr[h//4: 3*h//4, w//4: 3*w//4]
 
-        # Select largest face
-        x, y, w, h = max(faces, key=lambda b: b[2] * b[3])
-        
-        # Forehead and upper cheek sub-ROI (approx 20% to 65% height, 20% to 80% width of face box)
-        roi_y1 = int(y + 0.15 * h)
-        roi_y2 = int(y + 0.65 * h)
-        roi_x1 = int(x + 0.20 * w)
-        roi_x2 = int(x + 0.80 * w)
-
-        roi = frame_bgr[roi_y1:roi_y2, roi_x1:roi_x2]
-        return roi if roi.size > 0 else frame_bgr[y:y+h, x:x+w]
-
     def analyze_frames(self, frames: List[np.ndarray], fps: float) -> Dict[str, Any]:
         """
         Analyze a sequence of BGR video frames for cardiac periodicity.
@@ -171,28 +159,30 @@ class RPPGDetector:
         pulse_snr = float(peak_energy / total_energy)
 
         # 4. Biological Evaluation
-        # Authentic human faces exhibit a clear dominant pulse peak (SNR > 0.35)
-        # Deepfake face replacements have low SNR (< 0.20) because synthetic diffusion generates noisy color variance
+        # EXPERIMENTAL SUPPORTING SIGNAL. A clear cardiac peak is weak evidence of a live
+        # subject; its absence is NOT proof of a deepfake (compression, motion, low light,
+        # and dark skin tones all suppress the rPPG signal). The judge treats this as a
+        # low-weight supporting signal, never as a standalone verdict.
         if pulse_snr > 0.38 and 50 <= detected_bpm <= 150:
             has_pulse = True
-            rppg_ai_score = 0.15  # Strongly human
+            rppg_ai_score = 0.30  # leans human, but weak
             reasoning = (
-                f"Biological heart rate pulse verified via optical rPPG ({detected_bpm:.1f} BPM, SNR: {pulse_snr:.1%}). "
-                f"Sub-dermal micro-capillary blood volume pulse is consistent with a living human subject."
+                f"A periodic pulse-like signal (~{detected_bpm:.0f} BPM, SNR {pulse_snr:.0%}) "
+                f"was found in the face region, consistent with a live subject. Supporting signal only."
             )
         elif pulse_snr > 0.25:
             has_pulse = True
-            rppg_ai_score = 0.40  # Inconclusive/weak pulse
+            rppg_ai_score = 0.45  # inconclusive
             reasoning = (
-                f"Weak cardiac signal detected ({detected_bpm:.1f} BPM, SNR: {pulse_snr:.1%}). "
-                f"Potential video compression or subtle motion artifacts."
+                f"A weak, ambiguous pulse-like signal (~{detected_bpm:.0f} BPM, SNR {pulse_snr:.0%}) "
+                f"was found. This is inconclusive and could be compression or motion. Supporting signal only."
             )
         else:
             has_pulse = False
-            rppg_ai_score = 0.85  # Strongly synthetic
+            rppg_ai_score = 0.60  # leans synthetic, but far from proof
             reasoning = (
-                f"No biological cardiac pulse detected (SNR: {pulse_snr:.1%}). "
-                f"Facial pixels lack the physiological sub-dermal hemoglobin absorption cycles expected in authentic human video."
+                f"No clear cardiac pulse was recovered from the face region (SNR {pulse_snr:.0%}). "
+                f"This can indicate a synthetic face, but compression/motion/lighting also suppress it — treat as a weak flag, not proof."
             )
 
         # Generate base64 visualization plot of the BVP signal

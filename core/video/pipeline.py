@@ -2,9 +2,12 @@
 Video Deepfake Pipeline Orchestrator.
 
 Combines:
-1. Biological Hemodynamics (rPPG optical heart rate pulse tracking).
-2. Audio-Visual Biomechanical Kinematics (Phoneme-Viseme temporal synchrony).
-3. Frame-level Spatial Forensics (Image detection pipeline on keyframes).
+1. Voice-clone detection on the audio track (wav2vec2) — the PRIMARY, model-backed signal.
+2. Biological rPPG optical pulse (experimental supporting signal).
+3. Audio-visual lip-sync heuristic (experimental supporting signal).
+
+Only the voice-clone check is reliable enough to drive a verdict on its own; the visual
+signals can lower confidence or trigger human review but never declare a deepfake alone.
 """
 
 import os
@@ -33,15 +36,63 @@ class VideoVerdict:
     total_frames: int
     rppg_results: Dict[str, Any]
     lip_sync_results: Dict[str, Any]
+    voice_results: Dict[str, Any] = field(default_factory=dict)
     bvp_chart_b64: Optional[str] = None
+    model_backed: bool = False
+    escalate: bool = False
 
 
 class VideoDetectionPipeline:
-    """Orchestrates comprehensive biological, kinematic, and visual video deepfake forensics."""
+    """Orchestrates video forensics.
+
+    Honesty model: the ONLY model-backed signal on a video is the wav2vec2 voice-clone
+    check on the audio track. rPPG and lip-sync are weak, experimental *supporting*
+    signals. So a confident AI verdict comes from the voice; the visual heuristics can
+    lower confidence / trigger escalation but cannot, by themselves, declare a deepfake.
+    """
 
     def __init__(self):
         self.rppg = RPPGDetector()
         self.lip_sync = PhonemeVisemeAnalyzer()
+
+    def _analyze_voice(self, audio, sr: int) -> Dict[str, Any]:
+        """Run the audio track through VAD + wav2vec2 voice-clone detector (primary signal)."""
+        try:
+            from core.vad import get_vad_processor
+            from core.detector import get_detector
+            from core.aggregator import aggregate_results
+            from core.audio_processor import split_into_chunks
+            from config import CHUNK_DURATION
+
+            chunks = split_into_chunks(audio, sr, CHUNK_DURATION)
+            vad = get_vad_processor()
+            vad_results = vad.process_chunks(chunks, sr)
+            det = get_detector()
+            detection_results = []
+            for i, (chunk, vr) in enumerate(zip(chunks, vad_results)):
+                if vr["has_speech"]:
+                    ai_prob, pred = det.predict(chunk, sr)
+                    detection_results.append(
+                        {"chunk_index": i, "ai_probability": ai_prob, "prediction": pred}
+                    )
+            if not detection_results:
+                return {"evaluated": False, "reason": "No speech detected in the audio track."}
+            ares = aggregate_results(vad_results, detection_results, CHUNK_DURATION)
+            return {
+                "evaluated": True,
+                "voice_ai_prob": float(ares.overall_ai_probability),
+                "speech_chunks": ares.speech_chunks,
+                "reasoning": (
+                    f"Voice-clone model flags the speech as likely AI-generated "
+                    f"({ares.overall_ai_probability:.0%})."
+                    if ares.overall_ai_probability > 0.5
+                    else f"Voice-clone model finds the speech consistent with a real human voice "
+                    f"({1 - ares.overall_ai_probability:.0%})."
+                ),
+            }
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Voice-clone analysis on video audio failed: {e}")
+            return {"evaluated": False, "reason": f"Voice analysis unavailable: {e}"}
 
     def analyze_video(self, video_path: str, max_frames: int = 150) -> VideoVerdict:
         """
@@ -90,51 +141,86 @@ class VideoDetectionPipeline:
         except Exception as e:
             logger.info(f"Video does not have readable audio track or audio extraction failed: {e}")
 
-        # 1. Biological rPPG pulse analysis
+        # 1. Biological rPPG pulse analysis (SUPPORTING, experimental)
         rppg_res = self.rppg.analyze_frames(frames, fps)
 
-        # 2. Audio-Visual Phoneme-Viseme kinematic analysis
+        # 2. Audio-Visual lip-sync heuristic (SUPPORTING, experimental)
         lip_res = self.lip_sync.analyze_synchrony(frames, fps, audio, sr)
 
-        # 3. Aggregate composite verdict
-        scores = []
-        weights = []
+        # 3. Voice-clone detection on the audio track (PRIMARY, model-backed)
+        voice_res = (
+            self._analyze_voice(audio, sr)
+            if audio is not None and len(audio) > 0
+            else {"evaluated": False, "reason": "No audio track found in the video."}
+        )
 
-        # rPPG weight (if face was found)
+        # 4. Tiered fusion (mirrors the image judge's honesty rules)
+        supporting_scores, supporting_weights = [], []
         if rppg_res["has_face"]:
-            scores.append(rppg_res["rppg_ai_score"])
-            weights.append(1.5)
-
-        # Lip-sync weight (if evaluated)
+            supporting_scores.append(rppg_res["rppg_ai_score"])
+            supporting_weights.append(0.5)
         if lip_res["lip_sync_evaluated"]:
-            scores.append(lip_res["kinematic_mismatch_score"])
-            weights.append(1.2)
+            supporting_scores.append(lip_res["kinematic_mismatch_score"])
+            supporting_weights.append(0.5)
+        support_mean = (
+            float(np.average(supporting_scores, weights=supporting_weights))
+            if supporting_scores else None
+        )
+        support_flags_synthetic = support_mean is not None and support_mean > 0.6
 
-        if not scores:
-            final_prob = 0.5
-        else:
-            final_prob = float(np.average(scores, weights=weights))
+        model_backed = voice_res.get("evaluated", False)
+        escalate = False
 
-        # Classify verdict
-        if final_prob > 0.55:
-            verdict = "AI_GENERATED"
-            explanation = (
-                f"Synthetic video artifacts detected. "
-                f"{rppg_res['reasoning']} {lip_res['reasoning']}"
-            )
-        elif final_prob < 0.45:
-            verdict = "HUMAN"
-            explanation = (
-                f"Authentic physiological and kinematic characteristics verified. "
-                f"{rppg_res['reasoning']} {lip_res['reasoning']}"
-            )
+        if model_backed:
+            # Primary voice signal drives the verdict; supporting nudges within ±0.15.
+            final_prob = voice_res["voice_ai_prob"]
+            if support_mean is not None:
+                nudge = float(np.clip((support_mean - 0.5) * 0.5, -0.15, 0.15))
+                final_prob = float(np.clip(final_prob + nudge, 0.0, 1.0))
+
+            if final_prob > 0.55:
+                verdict = "AI_GENERATED"
+                explanation = (
+                    f"Likely manipulated. {voice_res['reasoning']} "
+                    "Do not act on payment instructions in this video without confirming on a trusted channel."
+                )
+            elif final_prob < 0.45:
+                # Voice looks human — but our visual deepfake signals are weak. If they
+                # raise a strong flag, we escalate instead of clearing the video.
+                if support_flags_synthetic:
+                    verdict = "INCONCLUSIVE"
+                    escalate = True
+                    explanation = (
+                        f"The voice sounds like a real human ({1 - final_prob:.0%}), but visual signals "
+                        "(pulse / lip-sync) look off. Face-video manipulation can't be reliably confirmed here — manual review recommended."
+                    )
+                else:
+                    verdict = "HUMAN"
+                    explanation = (
+                        f"No strong signs of manipulation. {voice_res['reasoning']} "
+                        "Note: visual deepfake checks here are limited; verify high-value requests independently."
+                    )
+            else:
+                verdict = "INCONCLUSIVE"
+                escalate = True
+                explanation = "Borderline result — manual review recommended before acting."
         else:
+            # No reliable primary signal. We will NOT declare a deepfake from weak heuristics.
             verdict = "INCONCLUSIVE"
-            explanation = "Evidence is borderline or signals conflict between biological and kinematic domains."
+            escalate = True
+            final_prob = 0.5
+            reason = voice_res.get("reason", "No audio to analyze.")
+            explanation = (
+                f"Could not run the reliable voice-clone check ({reason}). "
+                "Only weak visual signals are available, which aren't enough to decide — manual review recommended. "
+                f"{rppg_res['reasoning']} {lip_res['reasoning']}"
+            )
 
-        # Compute confidence
+        # Confidence (never claim High from supporting-only or borderline)
         dev = abs(final_prob - 0.5)
-        if dev > 0.25:
+        if verdict == "INCONCLUSIVE":
+            confidence = "Low"
+        elif model_backed and dev > 0.25:
             confidence = "High"
         elif dev > 0.10:
             confidence = "Medium"
@@ -151,7 +237,10 @@ class VideoDetectionPipeline:
             total_frames=len(frames),
             rppg_results=rppg_res,
             lip_sync_results=lip_res,
+            voice_results=voice_res,
             bvp_chart_b64=rppg_res.get("bvp_chart_b64"),
+            model_backed=model_backed,
+            escalate=escalate,
         )
 
 

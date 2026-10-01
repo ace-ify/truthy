@@ -1,16 +1,17 @@
 """
-Audio-Visual Phoneme-Viseme Biomechanical Kinematic Analyzer.
+Audio–visual lip-sync heuristic (mouth-openness vs. audio energy correlation).
 
-Physical Principle:
-Human speech requires precise physical coordination between acoustic pressure generation in the
-vocal tract and mechanical kinematics of the facial musculature:
-1. Bilabial plosives (/p/, /b/, /m/) physically require COMPLETE lip closure prior to sound release.
-2. Labiodental fricatives (/f/, /v/) require lower lip contact with upper incisors.
-3. High acoustic energy vowels (/a/, /o/) require substantial mouth cavity opening.
+WHAT THIS ACTUALLY DOES (honest description):
+It estimates "mouth openness" per frame by counting dark pixels in a mouth region
+(the oral cavity is darker than lips/skin), builds a per-frame audio RMS-energy curve,
+and measures (a) how often loud audio coincides with a closed mouth or silence with a
+wide-open mouth, and (b) the correlation between the two curves.
 
-Neural speech-driven video generators (Wav2Lip, SadTalker, SyncTalk, LivePortrait) optimize for
-visual realism or perceptual lip sync error, but frequently generate acoustic sound bursts
-while the subject's lips remain wide open, violating speech biomechanics.
+This is NOT phoneme recognition and NOT viseme modelling — there is no acoustic model,
+no face landmarks, no viseme classifier. It is a coarse brightness-vs-loudness heuristic
+and is used only as a low-weight, EXPERIMENTAL supporting signal. A real audio-visual sync
+detector (e.g. SyncNet) would need a trained network and GPU, which is out of scope here.
+Absence of correlation is a weak flag, not proof of manipulation.
 """
 
 import numpy as np
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class PhonemeVisemeAnalyzer:
-    """Evaluates cross-modal physical synchronization between audio energy and lip kinematics."""
+    """Coarse lip-openness vs. audio-energy correlation (heuristic, experimental)."""
 
     def __init__(self):
         self.mouth_cascade = None
@@ -151,13 +152,13 @@ class PhonemeVisemeAnalyzer:
 
         if kinematic_mismatch > 0.55:
             reasoning = (
-                f"Audio-visual kinematic mismatch detected ({violations_count} biomechanical timing violations). "
-                f"Acoustic formant energy onsets do not correspond with anatomical lip aperture kinematics."
+                f"Audio and mouth-openness look poorly correlated ({violations_count} frames where loud "
+                f"audio met a closed mouth or silence met an open mouth). Weak lip-sync flag — supporting signal only."
             )
         else:
             reasoning = (
-                f"Acoustic speech energy and lip aperture show physical kinematic synchronization "
-                f"(correlation: {max_corr:.2f}, {violations_count} violations)."
+                f"Audio energy and mouth openness are reasonably correlated "
+                f"(corr {max_corr:.2f}, {violations_count} mismatch frames). Heuristic supporting signal only."
             )
 
         return {
