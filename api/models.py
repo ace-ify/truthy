@@ -86,8 +86,10 @@ class SignalBreakdown(BaseModel):
     """Individual analyzer result in the signal breakdown."""
     analyzer: str
     display_name: str
+    tier: str = "supporting"  # "primary" (model-backed) | "supporting" (heuristic)
     score: float = Field(..., ge=0.0, le=1.0)
     confidence: float = Field(..., ge=0.0, le=1.0)
+    weight: float = 0.0
     reasoning: str
     processing_time_ms: int = 0
     error: Optional[str] = None

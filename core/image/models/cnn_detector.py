@@ -31,8 +31,9 @@ class CNNDetector(BaseAnalyzer):
     """Dual-CNN AI image detector — face-specific + aggressive AI models."""
 
     name = "cnn_detector"
-    display_name = "CNN Classifier"
+    display_name = "AI image classifier (dual-CNN)"
     weight = 2.5
+    tier = "primary"  # the only model-backed image detector; drives the verdict
 
     def __init__(self):
         self.hf_token = os.environ.get("HF_TOKEN", "")

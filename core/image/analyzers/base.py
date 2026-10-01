@@ -22,6 +22,7 @@ class AnalyzerResult:
     processing_time_ms: int = 0
     error: Optional[str] = None # Set if analyzer failed
     weight: float = 1.0         # Weight hint for the judge
+    tier: str = "supporting"    # "primary" (model-backed) | "supporting" (heuristic)
 
     @staticmethod
     def failed(name: str, display_name: str, error: str) -> "AnalyzerResult":
@@ -43,6 +44,10 @@ class BaseAnalyzer(ABC):
     display_name: str = "Base Analyzer"
     # Weight hint for the judge (higher = more influence)
     weight: float = 1.0
+    # Honesty tier. "primary" = model-backed detector whose score is trustworthy on its own.
+    # "supporting" = heuristic/experimental signal that may nudge confidence but must NEVER
+    # flip a confident primary verdict by itself. Everything defaults to supporting.
+    tier: str = "supporting"
 
     @abstractmethod
     def _analyze(self, image_data: ImageData) -> AnalyzerResult:
@@ -64,9 +69,11 @@ class BaseAnalyzer(ABC):
             result = self._analyze(image_data)
             result.processing_time_ms = int((time.perf_counter() - start) * 1000)
             result.weight = self.weight
+            result.tier = self.tier
             return result
         except Exception as e:
             elapsed = int((time.perf_counter() - start) * 1000)
             result = AnalyzerResult.failed(self.name, self.display_name, str(e))
             result.processing_time_ms = elapsed
+            result.tier = self.tier
             return result

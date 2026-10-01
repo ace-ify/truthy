@@ -19,11 +19,18 @@ logger = logging.getLogger(__name__)
 
 
 class TruForDetector(BaseAnalyzer):
-    """Generates a forensic manipulation heatmap from multiple signals."""
+    """Generates an illustrative forensic attention heatmap from classic DSP signals.
+
+    NOTE: This is NOT the published TruFor model (no Noiseprint++ / transformer / trained
+    confidence map). It is a hand-weighted blend of ELA + noise + frequency + edge maps,
+    kept ONLY as a visual aid. Its numeric score does not drive the verdict (weight 0,
+    tier supporting) — the heatmap shows *where* the DSP signals are active, not proof of AI.
+    """
 
     name = "trufor_heatmap"
-    display_name = "Forensic Heatmap"
-    weight = 0.8  # Low weight — this is a heuristic combo, not the real TruFor model
+    display_name = "Attention heatmap (illustrative, not a detector)"
+    weight = 0.0  # visual artifact only — must not influence the fused score
+    tier = "supporting"
 
     # ELA resave quality
     ELA_QUALITY = 90
