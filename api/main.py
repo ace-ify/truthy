@@ -27,6 +27,7 @@ from core.aggregator import aggregate_results
 from core.report import envelope_from_image, envelope_from_video, envelope_from_voice
 from core.report_html import render_report_html
 from core.governance import store as case_store
+from core.governance import bundle as case_bundle
 from api.models import (
     AnalysisResponse, ErrorResponse, HealthResponse,
     VoiceDetectionRequest, VoiceDetectionResponse, VoiceDetectionErrorResponse,
@@ -1048,6 +1049,37 @@ async def escalate_case_endpoint(case_id: str):
         raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
     case_store.escalate_case(case_id)
     return {"status": "success", "caseId": case_id, "reviewStatus": "queued"}
+
+
+@app.get("/api/case/{case_id}/bundle")
+async def case_bundle_endpoint(case_id: str):
+    """Download the forwardable, tamper-evident evidence bundle (JSON) for a case."""
+    case = case_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    bundle = case_bundle.build_bundle(case)
+    return JSONResponse(content=bundle, headers={
+        "Content-Disposition": f'attachment; filename="truthy-{case_id}.bundle.json"'
+    })
+
+
+@app.post("/api/case/{case_id}/report")
+async def report_case_endpoint(case_id: str):
+    """Forward a case to the fraud/response channel (the Track-3 reporting path).
+    Builds a signed bundle, POSTs it to FRAUD_WEBHOOK_URL if configured, and records
+    the case as reported either way. Open to the end user (reporting a scam is the point)."""
+    case = case_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail={"status": "error", "message": "Case not found"})
+    bundle = case_bundle.build_bundle(case)
+    delivered, ref = case_bundle.forward_bundle(bundle)
+    case_store.mark_reported(case_id, ref)
+    return {
+        "status": "success", "caseId": case_id, "reportRef": ref,
+        "delivered": delivered, "signed": bundle["integrity"]["signed"],
+        "message": ("Forwarded to the fraud-response channel." if delivered
+                    else "Recorded as reported. Download the bundle to forward it, or set FRAUD_WEBHOOK_URL for automatic delivery."),
+    }
 
 
 @app.get("/api/review")

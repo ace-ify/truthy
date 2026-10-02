@@ -116,3 +116,11 @@ CASES_DB_PATH = os.getenv("CASES_DB_PATH", str(BASE_DIR / "cases.db"))
 # (approve / override / escalate). Do NOT rely on the same-origin bypass for these.
 # Empty => review endpoints are disabled (fail closed).
 REVIEWER_KEY = os.getenv("REVIEWER_KEY", "").strip()
+
+# Optional HMAC key to sign exported case bundles — makes forwarded evidence tamper-evident
+# so a receiving bank / fraud team can verify integrity. Empty => bundle is unsigned (disclosed).
+REPORT_SIGNING_KEY = os.getenv("REPORT_SIGNING_KEY", "").strip()
+
+# Optional webhook to forward a reported case to (e.g. a bank fraud-ops channel).
+# Empty => the case is recorded as reported locally without an outbound call.
+FRAUD_WEBHOOK_URL = os.getenv("FRAUD_WEBHOOK_URL", "").strip()

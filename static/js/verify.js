@@ -144,8 +144,10 @@
       <div class="flex flex-wrap gap-3">
         <a href="/api/case/${encodeURIComponent(env.caseId)}/report" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 text-sm font-medium transition-all"><i data-lucide="download" class="w-4 h-4"></i> Download evidence report</a>
         <button id="escalate" ${queued||reviewed?"disabled":""} class="inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 text-sm font-medium transition-all disabled:opacity-50"><i data-lucide="flag" class="w-4 h-4"></i> ${reviewed?"Reviewed":queued?"Queued for review":"Send to human review"}</button>
+        <button id="report" class="inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 text-sm font-medium transition-all"><i data-lucide="send" class="w-4 h-4"></i> Report to fraud team</button>
         <button id="again" class="inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 text-sm font-medium transition-all"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Check another</button>
       </div>
+      <p id="report-status" class="hidden text-xs text-gray-400"></p>
       <div class="text-xs text-gray-600 leading-relaxed border-t border-white/10 pt-4">
         Case <b class="text-gray-400">${esc(env.caseId||"—")}</b> · ${esc(env.createdAt||"")}<br>
         SHA-256: <span class="font-mono">${esc((env.sha256||"").slice(0,32))}…</span><br>
@@ -158,6 +160,17 @@
       try{ const rr=await fetch(`/api/case/${encodeURIComponent(env.caseId)}/escalate`,{method:"POST"}); eb.innerHTML=rr.ok?"Queued for review":"Failed, retry"; }catch{eb.innerHTML="Failed, retry";}
     });
     $("again").addEventListener("click",()=>{ result.classList.add("hidden"); upload.classList.remove("hidden"); resetFile(); consent.checked=false; setBtn(); window.scrollTo({top:0,behavior:"smooth"}); });
+    const rpt=$("report"), rst=$("report-status");
+    if(rpt) rpt.addEventListener("click", async ()=>{
+      rpt.disabled=true; rpt.innerHTML='Reporting…';
+      try{
+        const r=await fetch(`/api/case/${encodeURIComponent(env.caseId)}/report`,{method:"POST"});
+        const d=await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error(d.message||`Error ${r.status}`);
+        rpt.innerHTML="Reported ✓"; rst.classList.remove("hidden");
+        rst.innerHTML=`${esc(d.message)} Ref <span class="font-mono text-gray-300">${esc(d.reportRef)}</span>${d.signed?" · signed":""} · <a class="text-blue-400 hover:text-blue-300" href="/api/case/${encodeURIComponent(env.caseId)}/bundle" target="_blank" rel="noopener">download evidence bundle</a>`;
+      }catch(e){ rpt.disabled=false; rpt.innerHTML='<i data-lucide="send" class="w-4 h-4"></i> Report to fraud team'; icons(); rst.classList.remove("hidden"); rst.textContent="Failed: "+e.message; }
+    });
     result.focus();
   }
   selectTab("image");

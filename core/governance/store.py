@@ -43,11 +43,19 @@ CREATE TABLE IF NOT EXISTS cases (
     review_status TEXT DEFAULT 'none',   -- none | queued | reviewed
     reviewer_note TEXT,
     reviewer_decision TEXT,              -- confirm | override_authentic | override_fake
-    reviewed_at   TEXT
+    reviewed_at   TEXT,
+    reported_at   TEXT,                  -- when forwarded to a fraud/response channel
+    report_ref    TEXT                   -- reference id of the forwarded report
 );
 CREATE INDEX IF NOT EXISTS idx_cases_review ON cases(review_status);
 CREATE INDEX IF NOT EXISTS idx_cases_created ON cases(created_at);
 """
+
+# Columns added after the original schema shipped; added to existing DBs on init.
+_MIGRATIONS = [
+    ("reported_at", "ALTER TABLE cases ADD COLUMN reported_at TEXT"),
+    ("report_ref", "ALTER TABLE cases ADD COLUMN report_ref TEXT"),
+]
 
 
 def _connect() -> sqlite3.Connection:
@@ -58,19 +66,20 @@ def _connect() -> sqlite3.Connection:
 
 
 def _ensure_init() -> None:
-    global _initialized
-    if _initialized:
-        return
+    # Idempotent and cheap: run every call so an in-memory flag can't desync from the
+    # actual DB file (e.g. if the file is recreated at runtime). CREATE ... IF NOT EXISTS
+    # + guarded ALTERs are near-free at hackathon volume.
     with _lock:
-        if _initialized:
-            return
         conn = _connect()
         try:
             conn.executescript(_SCHEMA)
+            existing = {r[1] for r in conn.execute("PRAGMA table_info(cases)").fetchall()}
+            for col, ddl in _MIGRATIONS:
+                if col not in existing:
+                    conn.execute(ddl)
             conn.commit()
         finally:
             conn.close()
-        _initialized = True
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -195,8 +204,25 @@ def review_case(case_id: str, decision: str, note: str = "") -> bool:
             conn.close()
 
 
+def mark_reported(case_id: str, report_ref: str) -> bool:
+    """Record that a case was forwarded to a fraud/response channel."""
+    _ensure_init()
+    reported_at = datetime.now(timezone.utc).isoformat()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "UPDATE cases SET reported_at=?, report_ref=? WHERE case_id=?",
+                (reported_at, report_ref, case_id),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+        finally:
+            conn.close()
+
+
 if __name__ == "__main__":
-    # ponytail: self-check — record -> fetch -> escalate -> review round-trips.
+    # ponytail: self-check — record -> fetch -> review -> report round-trips.
     import tempfile, os
     import config
     config.CASES_DB_PATH = os.path.join(tempfile.gettempdir(), "cases_selfcheck.db")
@@ -213,6 +239,8 @@ if __name__ == "__main__":
     assert c["sha256"] == sha256_bytes(b"hello-bytes")
     assert review_case(meta["caseId"], "confirm", "looks fake")
     assert get_case(meta["caseId"])["review_status"] == "reviewed"
+    assert mark_reported(meta["caseId"], "RPT-TEST")
+    assert get_case(meta["caseId"])["report_ref"] == "RPT-TEST"
     assert len(list_cases()) >= 1
     os.unlink(config.CASES_DB_PATH)
     print("governance store self-check OK:", meta["caseId"])
