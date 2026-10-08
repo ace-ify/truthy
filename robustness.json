@@ -1,0 +1,27 @@
+{
+  "images_probed": 23,
+  "overall_flip_rate": 0.0326,
+  "per_perturbation": {
+    "jpeg_q60": {
+      "tested": 23,
+      "flipped": 1,
+      "flip_rate": 0.0435
+    },
+    "gaussian_noise": {
+      "tested": 23,
+      "flipped": 0,
+      "flip_rate": 0.0
+    },
+    "rescale_50": {
+      "tested": 23,
+      "flipped": 1,
+      "flip_rate": 0.0435
+    },
+    "blur": {
+      "tested": 23,
+      "flipped": 1,
+      "flip_rate": 0.0435
+    }
+  },
+  "note": "Flip = calibrated verdict changed vs the clean image. Lower is more robust. Perturbations: JPEG Q60, Gaussian noise, 50% rescale round-trip, mild blur."
+}

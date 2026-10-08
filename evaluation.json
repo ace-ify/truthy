@@ -1,0 +1,22 @@
+{
+  "n_total": 60,
+  "n_ai": 18,
+  "n_human": 42,
+  "auc_all": 0.6614,
+  "escalation_rate": 0.6167,
+  "n_confident": 23,
+  "confident": {
+    "auc": 0.9683,
+    "accuracy": 0.8696,
+    "precision_ai": 1.0,
+    "recall_ai": 0.6667,
+    "confusion": {
+      "tp": 6,
+      "fp": 0,
+      "tn": 14,
+      "fn": 3
+    }
+  },
+  "calibrated": true,
+  "note": "Operating point = calibrated P(AI)>0.5 on the confident-primary population; the rest escalate to human review."
+}
