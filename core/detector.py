@@ -18,6 +18,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import SAMPLE_RATE, DEEPFAKE_MODEL_ID, AI_THRESHOLD
 
 
+# Exact label names that indicate AI/fake audio
+_AI_LABELS_EXACT = {"fake", "spoof", "deepfake", "synthetic", "ai", "label_0"}
+
+
 class DeepfakeDetector:
     
     # HuggingFace Inference API endpoint
@@ -144,6 +148,23 @@ class DeepfakeDetector:
             
         print(f"Model loaded. Labels: AI={self.ai_index}, Human={self.human_index}")
     
+    def _is_ai_label(self, label: str) -> bool:
+        """
+        Determine whether a label string represents an AI/fake class.
+
+        Uses exact matching against a known set of AI label names to prevent
+        substring-based bypass attacks (e.g. a label like "score_100" containing
+        the digit "0" being mis-classified as the AI label).
+        """
+        label_lower = label.lower().strip()
+        # Exact match against the known AI label set
+        if label_lower in _AI_LABELS_EXACT:
+            return True
+        # Allow "label_0" as a prefix only (e.g. "label_0" exactly, not "label_01")
+        if label_lower == "label_0":
+            return True
+        return False
+
     def _predict_api(self, audio: np.ndarray, sr: int) -> Tuple[float, str]:
         import soundfile as sf
         
@@ -172,10 +193,10 @@ class DeepfakeDetector:
                     # Format: [{"label": "LABEL_0", "score": 0.95}, {"label": "LABEL_1", "score": 0.05}]
                     ai_prob = 0.0
                     for item in results:
-                        label = item.get("label", "").lower()
+                        label = item.get("label", "").lower().strip()
                         score = item.get("score", 0.0)
-                        # Check if this is the AI/fake label
-                        if any(term in label for term in ["fake", "spoof", "deepfake", "synthetic", "ai", "label_0", "0"]):
+                        # Use exact label matching to prevent substring-based bypass
+                        if self._is_ai_label(label):
                             ai_prob = score
                             break
                     
